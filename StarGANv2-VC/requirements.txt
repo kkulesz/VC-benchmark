@@ -1,0 +1,9 @@
+SoundFile
+torchaudio
+munch
+parallel_wavegan
+torch
+pydub
+pyyaml
+click
+librosa
