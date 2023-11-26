@@ -1,6 +1,11 @@
 .idea/
 
+###
+StarGANv2-VC/Data/
+StarGANv2-VC/Models
+StarGANv2-VC/Vocoder
 
+#####################################################3
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
