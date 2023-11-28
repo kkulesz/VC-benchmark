@@ -1,8 +1,8 @@
-log_dir: "Models/VCTK20"
-save_freq: 2
-device: "cuda"
-epochs: 150
-batch_size: 5
+log_dir: "Models/VCTK20-test"
+save_freq: 1  # default 2
+device: "cpu" # default "cuda"
+epochs: 1     # default 150
+batch_size: 2 # default 5 ~~ supposedly takes 10GBs GPUs RAM in that case
 pretrained_model: ""
 load_only_params: false
 fp16_run: true

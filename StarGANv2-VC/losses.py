@@ -200,7 +200,9 @@ def r1_reg(d_out, x_in):
 # for F0 consistency loss
 def compute_mean_f0(f0):
     f0_mean = f0.mean(-1)
-    f0_mean = f0_mean.expand(f0.shape[-1], f0_mean.shape[0]).transpose(0, 1) # (B, M)
+    # print(f0_mean.shape)
+    # print(f0_mean)
+    f0_mean = f0_mean.expand(f0.shape[-1], f0_mean.shape[0]).transpose(0, 1) # (B, M) # TODO: bugged with batch_size = 1
     return f0_mean
 
 def f0_loss(x_f0, y_f0):
@@ -208,6 +210,8 @@ def f0_loss(x_f0, y_f0):
     x.shape = (B, 1, M, L): predict
     y.shape = (B, 1, M, L): target
     """
+    # print(f"x_f0 shape: {x_f0.shape}")
+    # print(f"y_f0 shape: {y_f0.shape}")
     # compute the mean
     x_mean = compute_mean_f0(x_f0)
     y_mean = compute_mean_f0(y_f0)

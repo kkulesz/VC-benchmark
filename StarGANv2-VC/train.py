@@ -15,12 +15,13 @@ warnings.simplefilter('ignore')
 
 from functools import reduce
 from munch import Munch
+import time
 
 from meldataset import build_dataloader
 from optimizers import build_optimizer
 from models import build_model
 from trainer import Trainer
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 
 from Utils.ASR.models import ASRCNN
 from Utils.JDC.model import JDCNet
@@ -44,7 +45,7 @@ def main(config_path):
     log_dir = config['log_dir']
     if not osp.exists(log_dir): os.makedirs(log_dir, exist_ok=True)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
-    writer = SummaryWriter(log_dir + "/tensorboard")
+    # writer = SummaryWriter(log_dir + "/tensorboard")
 
     # write logs
     file_handler = logging.FileHandler(osp.join(log_dir, 'train.log'))
@@ -130,10 +131,11 @@ def main(config_path):
         for key, value in results.items():
             if isinstance(value, float):
                 logger.info('%-15s: %.4f' % (key, value))
-                writer.add_scalar(key, value, epoch)
+                # writer.add_scalar(key, value, epoch)
             else:
                 for v in value:
-                    writer.add_figure('eval_spec', v, epoch)
+                    # writer.add_figure('eval_spec', v, epoch)
+                    pass
         if (epoch % save_freq) == 0:
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
 
@@ -153,4 +155,10 @@ def get_data_path_list(train_path=None, val_path=None):
     return train_list, val_list
 
 if __name__=="__main__":
+    import os
+    torch.backends.cudnn.benchmark = True
+    torch.cuda.empty_cache()
+    # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:21"
+    start = time.time()
     main()
+    print(f"Elapse time: {time.time() - start}")
