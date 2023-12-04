@@ -1,14 +1,14 @@
-log_dir: "Models/VCTK20-test"
+log_dir: "Models/test-log"
 save_freq: 1  # default 2
 device: "cuda" # default "cuda"
-epochs: 1     # default 150
-batch_size: 2 # default 5 ~~ supposedly takes 10GBs GPUs RAM in that case
+epochs: 2     # default 150
+batch_size: 12 # default 5 ~~ supposedly takes 10GBs GPUs RAM in that case
 pretrained_model: ""
 load_only_params: false
 fp16_run: true
 
-train_data: "Data/train_list.txt"
-val_data: "Data/val_list.txt"
+train_data: "../../Data/StarGANv2-VC/train_list.txt"
+val_data: "../../Data/StarGANv2-VC/val_list.txt"
 
 F0_path: "Utils/JDC/bst.t7"
 ASR_config: "Utils/ASR/config.yml"

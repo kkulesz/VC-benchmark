@@ -141,16 +141,13 @@ def main(config_path):
 
     return 0
 
-def get_data_path_list(train_path=None, val_path=None):
-    if train_path is None:
-        train_path = "Data/train_list.txt"
-    if val_path is None:
-        val_path = "Data/val_list.txt"
-
+def get_data_path_list(train_path, val_path):
     with open(train_path, 'r') as f:
         train_list = f.readlines()
+        train_list = list(map(lambda p: os.path.join(os.getcwd(), os.path.dirname(train_path) + p.replace("./Data", "")), train_list))
     with open(val_path, 'r') as f:
         val_list = f.readlines()
+        val_list = list(map(lambda p: os.path.join(os.getcwd(), os.path.dirname(val_path) + p.replace("./Data", "")), val_list))
 
     return train_list, val_list
 
