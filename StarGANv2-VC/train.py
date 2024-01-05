@@ -142,6 +142,14 @@ def main(config_path):
     return 0
 
 def get_data_path_list(train_path, val_path):
+    """
+    given:
+        in config: train_data: "../../Data/StarGANv2-VC/train_list.txt"
+        running from /{...}/StarGANv2-VC
+
+    returns list of:
+        /{...}/StarGANv2-VC/../../Data/StarGANv2-VC/{}
+    """
     with open(train_path, 'r') as f:
         train_list = f.readlines()
         train_list = list(map(lambda p: os.path.join(os.getcwd(), os.path.dirname(train_path) + p.replace("./Data", "")), train_list))
