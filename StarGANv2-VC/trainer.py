@@ -159,7 +159,8 @@ class Trainer(object):
         use_con_reg = (self.epochs >= self.args.con_reg_epoch)
         use_adv_cls = (self.epochs >= self.args.adv_cls_epoch)
         
-        for train_steps_per_epoch, batch in enumerate(tqdm(self.train_dataloader, desc="[train]"), 1):
+        # for train_steps_per_epoch, batch in enumerate(tqdm(self.train_dataloader, desc="[train]"), 1):
+        for train_steps_per_epoch, batch in enumerate(self.train_dataloader, 1):
 
             ### load data
             batch = [b.to(self.device) for b in batch]
@@ -239,7 +240,8 @@ class Trainer(object):
         eval_losses = defaultdict(list)
         eval_images = defaultdict(list)
         _ = [self.model[k].eval() for k in self.model]
-        for eval_steps_per_epoch, batch in enumerate(tqdm(self.val_dataloader, desc="[eval]"), 1):
+        # for eval_steps_per_epoch, batch in enumerate(tqdm(self.val_dataloader, desc="[eval]"), 1):
+        for eval_steps_per_epoch, batch in enumerate(self.val_dataloader, 1):
 
             ### load data
             batch = [b.to(self.device) for b in batch]

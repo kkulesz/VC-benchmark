@@ -1,5 +1,6 @@
 import torch
-
+from tqdm import tqdm
+import time
 
 def print_machine_props():
     print(f"Torch version: {torch.__version__}")
@@ -19,9 +20,18 @@ def print_machine_props():
         print(f"\tallocated: \t{to_gb(a)} GB")
 
 
-def main():
-    print_machine_props()
+def test_tqdm():
+    l = range(0,10)
+    s = 0
+    for i, a in enumerate(tqdm(l)):
+        time.sleep(1)
+        s = a
+    print(s)
 
+
+def main():
+    # print_machine_props()
+    test_tqdm()
 
 if __name__ == '__main__':
     main()

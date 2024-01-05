@@ -160,10 +160,10 @@ def get_data_path_list(train_path, val_path):
     return train_list, val_list
 
 if __name__=="__main__":
-    import os
-    torch.backends.cudnn.benchmark = True
-    torch.cuda.set_per_process_memory_fraction(1.0)
-    torch.cuda.empty_cache()
+    # import os
+    # torch.backends.cudnn.benchmark = True
+    # torch.cuda.set_per_process_memory_fraction(1.0)
+    # torch.cuda.empty_cache()
     # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:21"
     start = time.time()
     main()
