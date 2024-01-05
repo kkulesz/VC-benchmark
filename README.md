@@ -20,5 +20,7 @@ Given you are in project root
 ### most important:
 - change `model_params.num_domains` to the number of speakers in the dataset!
 - data needs to be prepared. Example: https://github.com/yl4579/StarGANv2-VC/blob/main/Data/VCTK.ipynb
+- data preprocessing (at least VCTK) works only under linux
+
 
 ## FreeVC
