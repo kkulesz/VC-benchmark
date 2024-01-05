@@ -52,7 +52,7 @@ def main(config_path):
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s: %(message)s'))
     logger.addHandler(file_handler)
-    
+
     batch_size = config.get('batch_size', 10)
     device = config.get('device', 'cpu')
     epochs = config.get('epochs', 1000)
@@ -61,7 +61,7 @@ def main(config_path):
     val_path = config.get('val_data', None)
     stage = config.get('stage', 'star')
     fp16_run = config.get('fp16_run', False)
-    
+
     # load data
     train_list, val_list = get_data_path_list(train_path, val_path)
     train_dataloader = build_dataloader(train_list,
@@ -84,13 +84,13 @@ def main(config_path):
     params = torch.load(ASR_path, map_location='cpu')['model']
     ASR_model.load_state_dict(params)
     _ = ASR_model.eval()
-    
+
     # load pretrained F0 model
     F0_path = config.get('F0_path', False)
     F0_model = JDCNet(num_class=1, seq_len=192)
     params = torch.load(F0_path, map_location='cpu')['net']
     F0_model.load_state_dict(params)
-    
+
     # build model
     model, model_ema = build_model(Munch(config['model_params']), F0_model, ASR_model)
 
@@ -100,7 +100,7 @@ def main(config_path):
         "epochs": epochs,
         "steps_per_epoch": len(train_dataloader),
     }
-    
+
     _ = [model[key].to(device) for key in model]
     _ = [model_ema[key].to(device) for key in model_ema]
     scheduler_params_dict = {key: scheduler_params.copy() for key in model}
@@ -121,21 +121,26 @@ def main(config_path):
         trainer.load_checkpoint(config['pretrained_model'],
                                 load_only_params=config.get('load_only_params', True))
 
+    def get_log_results_str(results_dict: dict) -> str:
+        k_v_tuples = [(k, v) for k, v in results_dict.items()]
+        return " | ".join(list(map(lambda k_v: '%-8s: %.4f' % (k_v[0], k_v[1]), k_v_tuples)))
+
     for _ in range(1, epochs+1):
         epoch = trainer.epochs
+
+        start_train = time.time()
         train_results = trainer._train_epoch()
+        train_time = time.time() - start_train
+
+        start_eval = time.time()
         eval_results = trainer._eval_epoch()
-        results = train_results.copy()
-        results.update(eval_results)
-        logger.info('--- epoch %d ---' % epoch)
-        for key, value in results.items():
-            if isinstance(value, float):
-                logger.info('%-15s: %.4f' % (key, value))
-                # writer.add_scalar(key, value, epoch)
-            else:
-                for v in value:
-                    # writer.add_figure('eval_spec', v, epoch)
-                    pass
+        eval_time = time.time() - start_eval
+
+        logger.info('--- epoch % out of %d ---' % (epoch, epochs))
+        logger.info('train time: %f -- eval time: %f ' % (train_time, eval_time))
+        logger.info(f"train: {get_log_results_str(train_results)}")
+        logger.info(f"eval : {get_log_results_str(eval_results)}")
+
         if (epoch % save_freq) == 0:
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
 
@@ -159,7 +164,8 @@ def get_data_path_list(train_path, val_path):
 
     return train_list, val_list
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     # import os
     # torch.backends.cudnn.benchmark = True
     # torch.cuda.set_per_process_memory_fraction(1.0)

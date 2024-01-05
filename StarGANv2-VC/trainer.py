@@ -225,9 +225,9 @@ class Trainer(object):
             self.optimizer.scheduler()
 
             for key in d_losses_latent:
-                train_losses["train/%s" % key].append(d_losses_latent[key])
+                train_losses["%s" % key].append(d_losses_latent[key])
             for key in g_losses_latent:
-                train_losses["train/%s" % key].append(g_losses_latent[key])
+                train_losses["%s" % key].append(g_losses_latent[key])
 
 
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
@@ -260,9 +260,9 @@ class Trainer(object):
                 self.model, self.args.g_loss, x_real, y_org, y_trg, x_refs=[x_ref, x_ref2], use_adv_cls=use_adv_cls)
 
             for key in d_losses_latent:
-                eval_losses["eval/%s" % key].append(d_losses_latent[key])
+                eval_losses["%s" % key].append(d_losses_latent[key])
             for key in g_losses_latent:
-                eval_losses["eval/%s" % key].append(g_losses_latent[key])
+                eval_losses["%s" % key].append(g_losses_latent[key])
 
 #             if eval_steps_per_epoch % 10 == 0:
 #                 # generate x_fake
