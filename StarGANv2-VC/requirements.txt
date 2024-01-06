@@ -5,3 +5,15 @@ pydub
 pyyaml
 click
 librosa
+
+
+## MyComputer has cuda 12.2
+#-i https://download.pytorch.org/whl/cu121
+#torchaudio
+#torch
+
+
+# TitanV has cuda 11.4
+-i https://download.pytorch.org/whl/cu113
+torch==1.12.1+cu113
+torchaudio==0.12.1
