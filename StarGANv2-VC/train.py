@@ -143,7 +143,7 @@ def main(config_path):
 
         if (epoch % save_freq) == 0:
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
-
+    trainer.save_checkpoint(osp.join(log_dir, 'final_%05d_epochs.pth' % epochs))
     return 0
 
 def get_data_path_list(train_path, val_path):
