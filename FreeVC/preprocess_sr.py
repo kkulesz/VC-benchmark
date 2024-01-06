@@ -9,7 +9,7 @@ from scipy.io import wavfile
 
 import utils
 from mel_processing import mel_spectrogram_torch
-from wavlm import WavLM, WavLMConfig
+from .wavlm.WavLM import WavLM, WavLMConfig
 #import h5py
 import logging
 logging.getLogger('numba').setLevel(logging.WARNING)

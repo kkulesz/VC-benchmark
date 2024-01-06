@@ -9,7 +9,7 @@ from tqdm import tqdm
 import utils
 from models import SynthesizerTrn
 from mel_processing import mel_spectrogram_torch
-from wavlm import WavLM, WavLMConfig
+from .wavlm.WavLM import WavLM, WavLMConfig
 from speaker_encoder.voice_encoder import SpeakerEncoder
 import logging
 logging.getLogger('numba').setLevel(logging.WARNING)
@@ -54,7 +54,8 @@ if __name__ == "__main__":
 
     print("Synthesizing...")
     with torch.no_grad():
-        for line in tqdm(zip(titles, srcs, tgts)):
+        # for line in tqdm(zip(titles, srcs, tgts)):
+        for line in zip(titles, srcs, tgts):
             title, src, tgt = line
             # tgt
             wav_tgt, _ = librosa.load(tgt, sr=hps.data.sampling_rate)

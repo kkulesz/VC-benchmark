@@ -6,7 +6,7 @@ from glob import glob
 from tqdm import tqdm
 
 import utils
-from wavlm import WavLM, WavLMConfig
+from wavlm.WavLM import WavLM, WavLMConfig
 
 
 def process(filename):
