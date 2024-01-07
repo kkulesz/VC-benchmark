@@ -1,5 +1,5 @@
-from speaker_encoder.hparams import *
-from speaker_encoder import audio
+from .hparams import *
+from . import audio
 from pathlib import Path
 from typing import Union, List
 from torch import nn

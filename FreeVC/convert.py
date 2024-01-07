@@ -9,7 +9,7 @@ from tqdm import tqdm
 import utils
 from models import SynthesizerTrn
 from mel_processing import mel_spectrogram_torch
-from .wavlm.WavLM import WavLM, WavLMConfig
+from wavlm.WavLM import WavLM, WavLMConfig
 from speaker_encoder.voice_encoder import SpeakerEncoder
 import logging
 logging.getLogger('numba').setLevel(logging.WARNING)
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--outdir", type=str, default="output/freevc", help="path to output dir")
     parser.add_argument("--use_timestamp", default=False, action="store_true")
     args = parser.parse_args()
-    
+    print(args)
     os.makedirs(args.outdir, exist_ok=True)
     hps = utils.get_hparams_from_file(args.hpfile)
 
