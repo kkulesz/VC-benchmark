@@ -46,7 +46,7 @@ def process_lines_into_df(lines: List[str]):
 
 
 def main():
-    nohup_path = "../StarGANv2-VC/nohup.out"
+    nohup_path = "../StarGANv2-VC/Models/2024-01-05-demo-data-20-speakers/nohup.out"
     lines = read_lines(nohup_path)
     train_lines, eval_lines = filter_lines_and_split_train_eval(lines)
 
