@@ -13,7 +13,7 @@ librosa
 #torch
 
 
-# TitanV has cuda 11.4
--i https://download.pytorch.org/whl/cu113
-torch==1.12.1+cu113
-torchaudio==0.12.1
+## TitanV has cuda 11.4
+#-i https://download.pytorch.org/whl/cu113
+#torch==1.12.1+cu113
+#torchaudio==0.12.1
