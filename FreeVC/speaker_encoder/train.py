@@ -1,7 +1,7 @@
-from speaker_encoder.visualizations import Visualizations
-from speaker_encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
-from speaker_encoder.params_model import *
-from speaker_encoder.model import SpeakerEncoder
+from .visualizations import Visualizations
+from .data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
+from .params_model import *
+from .model import SpeakerEncoder
 from utils.profiler import Profiler
 from pathlib import Path
 import torch

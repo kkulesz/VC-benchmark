@@ -1,10 +1,10 @@
-from speaker_encoder import inference as encoder
+from . import inference as encoder
 from multiprocessing.pool import Pool
 from functools import partial
 from pathlib import Path
 # from utils import logmmse
-# from tqdm import tqdm
-# import numpy as np
+from tqdm import tqdm
+import numpy as np
 # import librosa
 
 

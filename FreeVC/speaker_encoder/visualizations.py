@@ -1,4 +1,4 @@
-from speaker_encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+from .data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 from datetime import datetime
 from time import perf_counter as timer
 import matplotlib.pyplot as plt
