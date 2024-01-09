@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.utils.data
 
-import commons 
+import commons
 from mel_processing import spectrogram_torch, spec_to_mel_torch
 from utils import load_wav_to_torch, load_filepaths_and_text, transform
 #import h5py
@@ -64,18 +64,18 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
                 center=False)
             spec = torch.squeeze(spec, 0)
             torch.save(spec, spec_filename)
-            
+
         if self.use_spk:
             spk_filename = filename.replace(".wav", ".npy")
-            spk_filename = spk_filename.replace("vctk-16k", "vctk-16k-preprocessed_spk\spk")
+            spk_filename = spk_filename.replace("vctk-16k", "spk/spk")  # TODO:
             spk = torch.from_numpy(np.load(spk_filename))
-        
+
         if not self.use_sr:
             c_filename = filename.replace(".wav", ".pt")
             c_filename = c_filename.replace("vctk-16k", "wavlm")
             c = torch.load(c_filename).squeeze(0)
         else:
-            i = random.randint(68,92)
+            i = random.randint(68, 92)  # TODO:
             '''
             basename = os.path.basename(filename)[:-4]
             spkname = basename[:4]
@@ -87,7 +87,7 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
             c_filename = filename.replace(".wav", f"_{i}.pt")
             c_filename = c_filename.replace("DUMMY", "dataset/sr/wavlm")
             c = torch.load(c_filename).squeeze(0)
-            
+
         # 2023.01.10 update: code below can deteriorate model performance
         # I added these code during cleaning up, thinking that it can offer better performance than my provided checkpoints, but actually it does the opposite.
         # What an act of 'adding legs to a snake'!
@@ -106,16 +106,15 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
         c = c[:, start:end]
         audio_norm = audio_norm[:, start*self.hop_length:end*self.hop_length]
         '''
-        
+
         if self.use_spk:
             return c, spec, audio_norm, spk
         else:
             return c, spec, audio_norm
 
     def __getitem__(self, index):
-        # print(self.audiopaths[index])
-        # print(self.audiopaths[index][0])
-        audio_path = f"../../Data/freevc-preprocessed/vctk-16k/{self.audiopaths[index][0][:4]}/{self.audiopaths[index][0]}"
+        import paths
+        audio_path = f"{paths.DOWNSAMPLED_16k_PATH}/{self.audiopaths[index][0][:4]}/{self.audiopaths[index][0]}"
         return self.get_audio(audio_path)
 
     def __len__(self):
@@ -150,17 +149,17 @@ class TextAudioSpeakerCollate():
             spks = torch.FloatTensor(len(batch), batch[0][3].size(0))
         else:
             spks = None
-        
+
         c_padded = torch.FloatTensor(len(batch), batch[0][0].size(0), max_spec_len)
         spec_padded = torch.FloatTensor(len(batch), batch[0][1].size(0), max_spec_len)
         wav_padded = torch.FloatTensor(len(batch), 1, max_wav_len)
         c_padded.zero_()
         spec_padded.zero_()
         wav_padded.zero_()
-        
+
         for i in range(len(ids_sorted_decreasing)):
             row = batch[ids_sorted_decreasing[i]]
-            
+
             c = row[0]
             c_padded[i, :, :c.size(1)] = c
 
@@ -171,18 +170,18 @@ class TextAudioSpeakerCollate():
             wav = row[2]
             wav_padded[i, :, :wav.size(1)] = wav
             wav_lengths[i] = wav.size(1)
-            
+
             if self.use_spk:
                 spks[i] = row[3]
-        
+
         spec_seglen = spec_lengths[-1] if spec_lengths[-1] < self.hps.train.max_speclen + 1 else self.hps.train.max_speclen + 1
-        wav_seglen = spec_seglen * self.hps.data.hop_length 
+        wav_seglen = spec_seglen * self.hps.data.hop_length
 
         spec_padded, ids_slice = commons.rand_spec_segments(spec_padded, spec_lengths, spec_seglen)
         wav_padded = commons.slice_segments(wav_padded, ids_slice * self.hps.data.hop_length, wav_seglen)
-        
+
         c_padded = commons.slice_segments(c_padded, ids_slice, spec_seglen)[:,:,:-1]
-    
+
         spec_padded = spec_padded[:,:,:-1]
         wav_padded = wav_padded[:,:,:-self.hps.data.hop_length]
 
@@ -206,11 +205,11 @@ class DistributedBucketSampler(torch.utils.data.distributed.DistributedSampler):
         self.lengths = dataset.lengths
         self.batch_size = batch_size
         self.boundaries = boundaries
-  
+
         self.buckets, self.num_samples_per_bucket = self._create_buckets()
         self.total_size = sum(self.num_samples_per_bucket)
         self.num_samples = self.total_size // self.num_replicas
-  
+
     def _create_buckets(self):
         buckets = [[] for _ in range(len(self.boundaries) - 1)]
         for i in range(len(self.lengths)):
@@ -218,12 +217,12 @@ class DistributedBucketSampler(torch.utils.data.distributed.DistributedSampler):
             idx_bucket = self._bisect(length)
             if idx_bucket != -1:
                 buckets[idx_bucket].append(i)
-  
+
         for i in range(len(buckets) - 1, 0, -1):
             if len(buckets[i]) == 0:
                 buckets.pop(i)
                 self.boundaries.pop(i+1)
-  
+
         num_samples_per_bucket = []
         for i in range(len(buckets)):
             len_bucket = len(buckets[i])
@@ -231,12 +230,12 @@ class DistributedBucketSampler(torch.utils.data.distributed.DistributedSampler):
             rem = (total_batch_size - (len_bucket % total_batch_size)) % total_batch_size
             num_samples_per_bucket.append(len_bucket + rem)
         return buckets, num_samples_per_bucket
-  
+
     def __iter__(self):
       # deterministically shuffle based on epoch
       g = torch.Generator()
       g.manual_seed(self.epoch)
-  
+
       indices = []
       if self.shuffle:
           for bucket in self.buckets:
@@ -244,38 +243,38 @@ class DistributedBucketSampler(torch.utils.data.distributed.DistributedSampler):
       else:
           for bucket in self.buckets:
               indices.append(list(range(len(bucket))))
-  
+
       batches = []
       for i in range(len(self.buckets)):
           bucket = self.buckets[i]
           len_bucket = len(bucket)
           ids_bucket = indices[i]
           num_samples_bucket = self.num_samples_per_bucket[i]
-  
+
           # add extra samples to make it evenly divisible
           rem = num_samples_bucket - len_bucket
           ids_bucket = ids_bucket + ids_bucket * (rem // len_bucket) + ids_bucket[:(rem % len_bucket)]
-  
+
           # subsample
           ids_bucket = ids_bucket[self.rank::self.num_replicas]
-  
+
           # batching
           for j in range(len(ids_bucket) // self.batch_size):
               batch = [bucket[idx] for idx in ids_bucket[j*self.batch_size:(j+1)*self.batch_size]]
               batches.append(batch)
-  
+
       if self.shuffle:
           batch_ids = torch.randperm(len(batches), generator=g).tolist()
           batches = [batches[i] for i in batch_ids]
       self.batches = batches
-  
+
       assert len(self.batches) * self.batch_size == self.num_samples
       return iter(self.batches)
-  
+
     def _bisect(self, x, lo=0, hi=None):
       if hi is None:
           hi = len(self.boundaries) - 1
-  
+
       if hi > lo:
           mid = (hi + lo) // 2
           if self.boundaries[mid] < x and x <= self.boundaries[mid+1]:

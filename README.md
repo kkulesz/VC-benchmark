@@ -28,3 +28,10 @@ Given you are in project root
 
 
 ## FreeVC
+- downsampling necessary both for 16k and 22k https://github.com/OlaWod/FreeVC/issues/33
+- preprocessing (optionals mean you can turn them on/off in settings) 
+1. downsample
+2. preprocess_flist 
+3. (optional) preprocess_spk
+4. (optional) preprocess_ssl
+5. (optional) preprocess_sr
