@@ -6,6 +6,8 @@ import numpy as np
 import glob
 import argparse
 
+import paths
+
 
 def build_from_path(in_dir, out_dir, weights_fpath):
     wavfile_paths = glob.glob(os.path.join(in_dir, '*.wav'))
@@ -36,18 +38,13 @@ def preprocess(in_dir, out_dir_root, spk, weights_fpath):
 
 
 if __name__ == "__main__":
-    data_dir = "../../Data/freevc-preprocessed"
-    source_data_dir = f"{data_dir}/vctk-16k/"
-    output_data_dir = f"{data_dir}/vctk-16k-preprocessed_spk/"
-    os.makedirs(output_data_dir, exist_ok=True)
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('--in_dir', type=str, default=source_data_dir)
-    parser.add_argument('--out_dir_root', type=str, default=output_data_dir)
+    parser.add_argument('--in_dir', type=str, default=paths.DOWNSAMPLED_16k_PATH)
+    parser.add_argument('--out_dir_root', type=str, default=paths.SPK_PATH)
     parser.add_argument('--spk_encoder_ckpt', type=str, default='speaker_encoder/ckpt/pretrained_bak_5805000.pt')
 
     args = parser.parse_args()
-
+    os.makedirs(args.out_dir_root, exist_ok=True)
     sub_folder_list = os.listdir(args.in_dir)
     sub_folder_list.sort()
 

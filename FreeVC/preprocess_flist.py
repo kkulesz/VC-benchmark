@@ -1,19 +1,18 @@
 import os
 import argparse
-from tqdm import tqdm
 from random import shuffle
 
+import paths
 
 if __name__ == "__main__":
-    source_data_dir = "../../Data/freevc-preprocessed/vctk-16k"
-    filelist_dir = "./filelists_mine"
+    filelist_dir = paths.FLIST_PATH
     os.makedirs(filelist_dir, exist_ok=True)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_list", type=str, default=f"{filelist_dir}/train.txt", help="path to train list")
     parser.add_argument("--val_list", type=str, default=f"{filelist_dir}/val.txt", help="path to val list")
     parser.add_argument("--test_list", type=str, default=f"{filelist_dir}/test.txt", help="path to test list")
-    parser.add_argument("--source_dir", type=str, default=source_data_dir, help="path to source dir")
+    parser.add_argument("--source_dir", type=str, default=paths.DOWNSAMPLED_16k_PATH, help="path to source dir")
     args = parser.parse_args()
     
     train = []

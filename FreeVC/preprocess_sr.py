@@ -4,20 +4,21 @@ import torch
 import librosa
 import json
 from glob import glob
-from tqdm import tqdm
 from scipy.io import wavfile
 
 import utils
 from mel_processing import mel_spectrogram_torch
-from .wavlm.WavLM import WavLM, WavLMConfig
+from wavlm.WavLM import WavLM, WavLMConfig
 #import h5py
 import logging
 logging.getLogger('numba').setLevel(logging.WARNING)
 
+import paths
+
 
 def process(filename):
     basename = os.path.basename(filename)
-    speaker = filename.split("/")[-2]#basename[:4]
+    speaker = filename.replace("\\", "/").split("/")[-2]#basename[:4]
     wav_dir = os.path.join(args.wav_dir, speaker)
     ssl_dir = os.path.join(args.ssl_dir, speaker)
     os.makedirs(wav_dir, exist_ok=True)
@@ -50,11 +51,7 @@ def process(filename):
         torch.save(c.cpu(), ssl_path)
         #print(wav_rs.size(), c.size())
         wav_path = os.path.join(wav_dir, basename.replace(".wav", f"_{i}.wav"))
-        wavfile.write(
-                wav_path,
-                args.sr,
-                _wav_rs
-        )
+        wavfile.write(wav_path, args.sr, _wav_rs)
     '''
         f[i][basename[:-4]] = c.cpu()
     for i in range(args.min, args.max+1):
@@ -67,11 +64,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--sr", type=int, default=16000, help="sampling rate")
     parser.add_argument("--min", type=int, default=68, help="min")
-    parser.add_argument("--max", type=int, default=92, help="max")
+    parser.add_argument("--max", type=int, default=70, help="max")  # old 92
     parser.add_argument("--config", type=str, default="hifigan/config.json", help="path to config file")
-    parser.add_argument("--in_dir", type=str, default="dataset/vctk-22k", help="path to input dir")
-    parser.add_argument("--wav_dir", type=str, default="dataset/sr/wav", help="path to output wav dir")
-    parser.add_argument("--ssl_dir", type=str, default="dataset/sr/wavlm", help="path to output ssl dir")
+    parser.add_argument("--in_dir", type=str, default=paths.DOWNSAMPLED_22k_PATH, help="path to input dir")
+    parser.add_argument("--wav_dir", type=str, default=paths.SR_WAV_PATH, help="path to output wav dir")
+    parser.add_argument("--ssl_dir", type=str, default=paths.SR_SSL_PATH, help="path to output ssl dir")
     args = parser.parse_args()
 
     print("Loading WavLM for content...")
@@ -95,6 +92,7 @@ if __name__ == "__main__":
 
     filenames = glob(f'{args.in_dir}/*/*.wav', recursive=True)#[:10]
     
-    for filename in tqdm(filenames):
+    for filename in filenames:
+        # print(filename)
         process(filename)
     

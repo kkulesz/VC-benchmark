@@ -7,6 +7,8 @@ from glob import glob
 import utils
 from wavlm.WavLM import WavLM, WavLMConfig
 
+import paths
+
 
 def process(filename):
     basename = os.path.basename(filename)
@@ -21,14 +23,10 @@ def process(filename):
 
 
 if __name__ == "__main__":
-    data_dir = "../../Data/freevc-preprocessed"
-    source_data_dir = f"{data_dir}/vctk-16k/"
-    output_data_dir = f"{data_dir}/wavlm/"
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--sr", type=int, default=16000, help="sampling rate")
-    parser.add_argument("--in_dir", type=str, default=source_data_dir, help="path to input dir")
-    parser.add_argument("--out_dir", type=str, default=output_data_dir, help="path to output dir")
+    parser.add_argument("--in_dir", type=str, default=paths.DOWNSAMPLED_16k_PATH, help="path to input dir")
+    parser.add_argument("--out_dir", type=str, default=paths.WAVLM_PATH, help="path to output dir")
     args = parser.parse_args()
     
     os.makedirs(args.out_dir, exist_ok=True)
