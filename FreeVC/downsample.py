@@ -7,7 +7,7 @@ from scipy.io import wavfile
 from tqdm import tqdm
 
 
-def process(wav_name):
+def process(wav_name, args):
     # speaker 's5', 'p280', 'p315' are excluded,
     speaker = wav_name[:4]
     wav_path = os.path.join(args.in_dir, speaker, wav_name)
@@ -37,12 +37,15 @@ def process(wav_name):
 
 
 if __name__ == "__main__":
+    data_dir = "../../Data"
+    output_dir = f"{data_dir}/freevc-preprocessed"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--sr1", type=int, default=16000, help="sampling rate")
     parser.add_argument("--sr2", type=int, default=22050, help="sampling rate")
-    parser.add_argument("--in_dir", type=str, default="/home/Datasets/lijingyi/data/vctk/wav48_silence_trimmed/", help="path to source dir")
-    parser.add_argument("--out_dir1", type=str, default="./dataset/vctk-16k", help="path to target dir")
-    parser.add_argument("--out_dir2", type=str, default="./dataset/vctk-22k", help="path to target dir")
+    parser.add_argument("--in_dir", type=str, default=f"{data_dir}/VCTK/wav48_silence_trimmed/", help="path to source dir")
+    parser.add_argument("--out_dir1", type=str, default=f"{output_dir}/vctk-16k", help="path to target dir")
+    parser.add_argument("--out_dir2", type=str, default=f"{output_dir}/vctk-22k", help="path to target dir")
     args = parser.parse_args()
 
     pool = Pool(processes=cpu_count()-2)
@@ -50,6 +53,9 @@ if __name__ == "__main__":
     for speaker in os.listdir(args.in_dir):
         spk_dir = os.path.join(args.in_dir, speaker)
         if os.path.isdir(spk_dir):
-            for _ in tqdm(pool.imap_unordered(process, os.listdir(spk_dir))):
-                pass
+            files_in_speaker_dir = os.listdir(spk_dir)
+            audio_in_speaker_dir = list(filter(lambda f: f.endswith(".flac"), files_in_speaker_dir))
+            for f in audio_in_speaker_dir:
+                process(f, args)
+            print(f"{spk_dir} - finished")
 
