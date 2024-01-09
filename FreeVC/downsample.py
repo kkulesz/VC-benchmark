@@ -13,27 +13,27 @@ def process(wav_name, args):
     wav_path = os.path.join(args.in_dir, speaker, wav_name)
     if os.path.exists(wav_path) and '_mic2.flac' in wav_path:
         os.makedirs(os.path.join(args.out_dir1, speaker), exist_ok=True)
-        os.makedirs(os.path.join(args.out_dir2, speaker), exist_ok=True)
+        # os.makedirs(os.path.join(args.out_dir2, speaker), exist_ok=True)
         wav, sr = librosa.load(wav_path)
         wav, _ = librosa.effects.trim(wav, top_db=20)
         peak = np.abs(wav).max()
         if peak > 1.0:
             wav = 0.98 * wav / peak
         wav1 = librosa.resample(wav, orig_sr=sr, target_sr=args.sr1)
-        wav2 = librosa.resample(wav, orig_sr=sr, target_sr=args.sr2)
+        # wav2 = librosa.resample(wav, orig_sr=sr, target_sr=args.sr2)
         save_name = wav_name.replace("_mic2.flac", ".wav")
         save_path1 = os.path.join(args.out_dir1, speaker, save_name)
-        save_path2 = os.path.join(args.out_dir2, speaker, save_name)
+        # save_path2 = os.path.join(args.out_dir2, speaker, save_name)
         wavfile.write(
             save_path1,
             args.sr1,
             (wav1 * np.iinfo(np.int16).max).astype(np.int16)
         )
-        wavfile.write(
-            save_path2,
-            args.sr2,
-            (wav2 * np.iinfo(np.int16).max).astype(np.int16)
-        )
+        # wavfile.write(
+        #     save_path2,
+        #     args.sr2,
+        #     (wav2 * np.iinfo(np.int16).max).astype(np.int16)
+        # )
 
 
 if __name__ == "__main__":

@@ -5,11 +5,15 @@ from random import shuffle
 
 
 if __name__ == "__main__":
+    source_data_dir = "../../Data/freevc-preprocessed/vctk-16k"
+    filelist_dir = "./filelists_mine"
+    os.makedirs(filelist_dir, exist_ok=True)
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train_list", type=str, default="./filelists/train.txt", help="path to train list")
-    parser.add_argument("--val_list", type=str, default="./filelists/val.txt", help="path to val list")
-    parser.add_argument("--test_list", type=str, default="./filelists/test.txt", help="path to test list")
-    parser.add_argument("--source_dir", type=str, default="./dataset/vctk-16k", help="path to source dir")
+    parser.add_argument("--train_list", type=str, default=f"{filelist_dir}/train.txt", help="path to train list")
+    parser.add_argument("--val_list", type=str, default=f"{filelist_dir}/val.txt", help="path to val list")
+    parser.add_argument("--test_list", type=str, default=f"{filelist_dir}/test.txt", help="path to test list")
+    parser.add_argument("--source_dir", type=str, default=source_data_dir, help="path to source dir")
     args = parser.parse_args()
     
     train = []
@@ -17,7 +21,7 @@ if __name__ == "__main__":
     test = []
     idx = 0
     
-    for speaker in tqdm(os.listdir(args.source_dir)):
+    for speaker in os.listdir(args.source_dir):
         wavs = os.listdir(os.path.join(args.source_dir, speaker))
         shuffle(wavs)
         train += wavs[2:-10]
@@ -27,25 +31,25 @@ if __name__ == "__main__":
     shuffle(train)
     shuffle(val)
     shuffle(test)
-            
-    print("Writing", args.train_list)
+
     with open(args.train_list, "w") as f:
-        for fname in tqdm(train):
-            speaker = fname[:4]
-            wavpath = os.path.join("DUMMY", speaker, fname)
-            f.write(wavpath + "\n")
-        
-    print("Writing", args.val_list)
+        for fname in train:
+            # speaker = fname[:4]
+            # wavpath = os.path.join("DUMMY", speaker, fname)
+            # f.write(wavpath + "\n")
+            f.write(fname + "\n")
+
     with open(args.val_list, "w") as f:
-        for fname in tqdm(val):
-            speaker = fname[:4]
-            wavpath = os.path.join("DUMMY", speaker, fname)
-            f.write(wavpath + "\n")
-            
-    print("Writing", args.test_list)
+        for fname in val:
+            # speaker = fname[:4]
+            # wavpath = os.path.join("DUMMY", speaker, fname)
+            # f.write(wavpath + "\n")
+            f.write(fname + "\n")
+
     with open(args.test_list, "w") as f:
-        for fname in tqdm(test):
-            speaker = fname[:4]
-            wavpath = os.path.join("DUMMY", speaker, fname)
-            f.write(wavpath + "\n")
+        for fname in test:
+            # speaker = fname[:4]
+            # wavpath = os.path.join("DUMMY", speaker, fname)
+            # f.write(wavpath + "\n")
+            f.write(fname + "\n")
             

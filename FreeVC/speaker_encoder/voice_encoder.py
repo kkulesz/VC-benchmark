@@ -41,9 +41,9 @@ class SpeakerEncoder(nn.Module):
         self.load_state_dict(checkpoint["model_state"], strict=False)
         self.to(device)
         
-        if verbose:
-            print("Loaded the voice encoder model on %s in %.2f seconds." % 
-                  (device.type, timer() - start))
+        # if verbose:
+        #     print("Loaded the voice encoder model on %s in %.2f seconds." %
+        #           (device.type, timer() - start))
 
     def forward(self, mels: torch.FloatTensor):
         """

@@ -3,7 +3,6 @@ import argparse
 import torch
 import librosa
 from glob import glob
-from tqdm import tqdm
 
 import utils
 from wavlm.WavLM import WavLM, WavLMConfig
@@ -22,10 +21,14 @@ def process(filename):
 
 
 if __name__ == "__main__":
+    data_dir = "../../Data/freevc-preprocessed"
+    source_data_dir = f"{data_dir}/vctk-16k/"
+    output_data_dir = f"{data_dir}/wavlm/"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--sr", type=int, default=16000, help="sampling rate")
-    parser.add_argument("--in_dir", type=str, default="dataset/vctk-16k", help="path to input dir")
-    parser.add_argument("--out_dir", type=str, default="dataset/wavlm", help="path to output dir")
+    parser.add_argument("--in_dir", type=str, default=source_data_dir, help="path to input dir")
+    parser.add_argument("--out_dir", type=str, default=output_data_dir, help="path to output dir")
     args = parser.parse_args()
     
     os.makedirs(args.out_dir, exist_ok=True)
@@ -40,6 +43,6 @@ if __name__ == "__main__":
     
     filenames = glob(f'{args.in_dir}/*/*.wav', recursive=True)
     
-    for filename in tqdm(filenames):
+    for filename in filenames:
         process(filename)
     
