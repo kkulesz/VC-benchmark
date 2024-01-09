@@ -44,7 +44,8 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
 
         lengths = []
         for audiopath in self.audiopaths:
-            lengths.append(os.path.getsize(audiopath[0]) // (2 * self.hop_length))
+            audio_path = f"../../Data/freevc-preprocessed/vctk-16k/{audiopath[0][:4]}/{audiopath[0]}"
+            lengths.append(os.path.getsize(audio_path) // (2 * self.hop_length))
         self.lengths = lengths
 
     def get_audio(self, filename):
@@ -66,12 +67,12 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
             
         if self.use_spk:
             spk_filename = filename.replace(".wav", ".npy")
-            spk_filename = spk_filename.replace("DUMMY", "dataset/spk")
+            spk_filename = spk_filename.replace("vctk-16k", "vctk-16k-preprocessed_spk\spk")
             spk = torch.from_numpy(np.load(spk_filename))
         
         if not self.use_sr:
             c_filename = filename.replace(".wav", ".pt")
-            c_filename = c_filename.replace("DUMMY", "dataset/wavlm")
+            c_filename = c_filename.replace("vctk-16k", "wavlm")
             c = torch.load(c_filename).squeeze(0)
         else:
             i = random.randint(68,92)
@@ -112,7 +113,10 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
             return c, spec, audio_norm
 
     def __getitem__(self, index):
-        return self.get_audio(self.audiopaths[index][0])
+        # print(self.audiopaths[index])
+        # print(self.audiopaths[index][0])
+        audio_path = f"../../Data/freevc-preprocessed/vctk-16k/{self.audiopaths[index][0][:4]}/{self.audiopaths[index][0]}"
+        return self.get_audio(audio_path)
 
     def __len__(self):
         return len(self.audiopaths)
