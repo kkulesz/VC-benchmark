@@ -1,1 +1,4 @@
 pandas==2.1.4
+
+# the same venv for metrics and utils
+-r ../metrics/requirements.txt

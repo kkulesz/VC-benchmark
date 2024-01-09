@@ -1,0 +1,6 @@
+fastdtw==0.3.4
+librosa==0.10.1
+numpy==1.26.3
+scipy==1.11.4
+
+-r mcd_mattshannon/requirements.txt
