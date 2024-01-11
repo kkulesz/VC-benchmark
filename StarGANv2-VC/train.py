@@ -41,7 +41,9 @@ torch.backends.cudnn.benchmark = True #
 
 def main(config_path):
     config = yaml.safe_load(open(config_path))
-
+    print(f"epochs: {config['epochs']}")
+    print(f"train_data: {config['train_data']}")
+    print(f"pretrained_model: {config['pretrained_model']}")
     log_dir = config['log_dir']
     if not osp.exists(log_dir): os.makedirs(log_dir, exist_ok=True)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
@@ -123,7 +125,7 @@ def main(config_path):
 
     def get_log_results_str(results_dict: dict) -> str:
         k_v_tuples = [(k, v) for k, v in results_dict.items()]
-        return " | ".join(list(map(lambda k_v: '%-8s: %.4f' % (k_v[0], k_v[1]), k_v_tuples)))
+        return " | ".join(list(map(lambda k_v: '%-5s: %.4f' % (k_v[0], k_v[1]), k_v_tuples)))
 
     for _ in range(1, epochs+1):
         epoch = trainer.epochs
@@ -136,7 +138,7 @@ def main(config_path):
         eval_results = trainer._eval_epoch()
         eval_time = time.time() - start_eval
 
-        logger.info('--- epoch % out of %d ---' % (epoch, epochs))
+        logger.info(f'--- epoch {epoch} out of {epochs} ---')
         logger.info('train time: %f -- eval time: %f ' % (train_time, eval_time))
         logger.info(f"train: {get_log_results_str(train_results)}")
         logger.info(f"eval : {get_log_results_str(eval_results)}")

@@ -1,7 +1,7 @@
-log_dir: "Models/2024-01-05-demo-data-20-speakers"
+log_dir: "Models/on-demo-data"
 save_freq: 30  # default 2
 device: "cuda" # default "cuda"
-epochs: 100     # default 150
+epochs: 200     # default 150
 batch_size: 12 # default 5 ~~ supposedly takes 10GBs GPUs RAM in that case
 pretrained_model: ""
 load_only_params: false
