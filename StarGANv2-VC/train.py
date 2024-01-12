@@ -144,6 +144,7 @@ def main(config_path):
         logger.info(f"eval : {get_log_results_str(eval_results)}")
 
         if (epoch % save_freq) == 0:
+            print("Saving...")
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
     trainer.save_checkpoint(osp.join(log_dir, 'final_%05d_epochs.pth' % epochs))
     return 0
