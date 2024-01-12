@@ -1,0 +1,9 @@
+vcc20/
+dump/
+vqw2v/
+*.wav
+speaker_encoder/__pycache__
+speaker_encoder/ckpt
+vocoder/checkpoint-400000steps.pkl
+exp/
+__pycache__/
