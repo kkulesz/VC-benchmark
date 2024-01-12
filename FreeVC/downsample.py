@@ -23,11 +23,11 @@ def process(wav_name, args):
         save_name = wav_name.replace("_mic2.flac", ".wav")
         save_path1 = os.path.join(args.out_dir1, speaker, save_name)
         save_path2 = os.path.join(args.out_dir2, speaker, save_name)
-        # wavfile.write(
-        #     save_path1,
-        #     args.sr1,
-        #     (wav1 * np.iinfo(np.int16).max).astype(np.int16)
-        # )
+        wavfile.write(
+            save_path1,
+            args.sr1,
+            (wav1 * np.iinfo(np.int16).max).astype(np.int16)
+        )
         wavfile.write(
             save_path2,
             args.sr2,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     speakers = os.listdir(args.in_dir)
-    speakers = speakers[:5]  # TODO: take only few for now
+    speakers = speakers[:3]  # TODO: take only few for now
     for speaker in speakers:
         spk_dir = os.path.join(args.in_dir, speaker)
         if os.path.isdir(spk_dir):

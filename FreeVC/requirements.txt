@@ -1,9 +1,9 @@
-glob2                   #==0.7
-tqdm==4.62.3
-librosa==0.8.1
+glob2 #==0.7
+tqdm #==4.62.3
+librosa #==0.8.1
 
-scipy==1.7.2
-tensorboard==2.7.0
+scipy #==1.7.2
+#tensorboard==2.7.0
 
 # to enable cuda
 -i https://download.pytorch.org/whl/cu113
@@ -11,16 +11,16 @@ torch==1.11.0+cu113             #1.10.0
 torchvision==0.12.0+cu113       #0.9.0
 
 # ImportError: Numba needs NumPy 1.22 or greater. Got NumPy 1.21.
-numpy==1.22  #==1.21.6
+numpy #==1.22  #==1.21.6
 
 # Problems on Windows 10 - for the future
 # https://stackoverflow.com/questions/64261546/how-to-solve-error-microsoft-visual-c-14-0-or-greater-is-required-when-inst
-webrtcvad==2.0.10
+#webrtcvad==2.0.10
 
 
 ##############
 # libs that were not in original file
-matplotlib==3.8.2
-multiprocess==0.70.15
-visdom==0.2.4
-umap==0.1.1
+#matplotlib==3.8.2
+#multiprocess==0.70.15
+#visdom==0.2.4
+#umap==0.1.1

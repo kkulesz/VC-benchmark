@@ -9,6 +9,7 @@ import commons
 from mel_processing import spectrogram_torch, spec_to_mel_torch
 from utils import load_wav_to_torch, load_filepaths_and_text, transform
 #import h5py
+import paths
 
 
 """Multi speaker version"""
@@ -44,7 +45,7 @@ class TextAudioSpeakerLoader(torch.utils.data.Dataset):
 
         lengths = []
         for audiopath in self.audiopaths:
-            audio_path = f"../../Data/freevc-preprocessed/vctk-16k/{audiopath[0][:4]}/{audiopath[0]}"
+            audio_path = f"{paths.DOWNSAMPLED_16k_PATH}/{audiopath[0][:4]}/{audiopath[0]}"
             lengths.append(os.path.getsize(audio_path) // (2 * self.hop_length))
         self.lengths = lengths
 
