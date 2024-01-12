@@ -5,6 +5,7 @@ Models used:
 - FreeVC - https://github.com/OlaWod/FreeVC / https://arxiv.org/abs/2210.15418
 - CVC -https://github.com/Tinglok/CVC / https://arxiv.org/abs/2011.00782
 - TriAAN-VC - https://github.com/winddori2002/TriAAN-VC / https://arxiv.org/abs/2303.09057
+- DYGAN - https://github.com/MingjieChen/DYGANVC / https://arxiv.org/abs/2203.17172
 
 Other repositories used:
 - mcd - https://github.com/MattShannon/mcd
