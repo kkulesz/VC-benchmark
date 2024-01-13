@@ -49,9 +49,9 @@ def test_state_dict():
     # print(state_dict.keys())
 
 def main():
-    # print_machine_props()
+    print_machine_props()
     # test_tqdm()
-    test_state_dict()
+    # test_state_dict()
 
 
 if __name__ == '__main__':
