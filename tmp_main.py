@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 import time
+import soundfile as sf
 
 
 def print_machine_props():
@@ -48,10 +49,18 @@ def test_state_dict():
     state_dict = torch.load(checkpoint_path, map_location="cpu")
     # print(state_dict.keys())
 
+
+def test_soundfile():
+    wave, sr = sf.read(
+        "D:\MAGISTERKA\VC-benchmark\StarGANv2-VC\preprocessing\../../../Data/PolishData-stargan\\pwr-maleset-unk\\61.wav")
+    wave_tensor = torch.from_numpy(wave).float()
+
+
 def main():
-    print_machine_props()
+    # print_machine_props()
     # test_tqdm()
     # test_state_dict()
+    test_soundfile()
 
 
 if __name__ == '__main__':
