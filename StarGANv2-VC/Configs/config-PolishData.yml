@@ -1,14 +1,14 @@
-log_dir: "Models/TEST"
-save_freq: 30  # default 2
-device: "cuda" # default "cuda"
-epochs: 1     # default 150
-batch_size: 12 # default 5 ~~ supposedly takes 10GBs GPUs RAM in that case
+log_dir: "../../Models/stargan/PolishData"
+save_freq: 30
+device: "cuda"
+epochs: 300     # default 150
+batch_size: 12
 pretrained_model: ""
 load_only_params: false
 fp16_run: true
 
-train_data: "../../Data/StarGANv2-VC/train_list_for_testing.txt"  # train_list_for_testing
-val_data: "../../Data/StarGANv2-VC/val_list_for_testing.txt"      # val_list_for_testing
+train_data: "../../Data/PolishData-stargan/train_list.txt"
+val_data: "../../Data/PolishData-stargan/val_list.txt"
 
 F0_path: "Utils/JDC/bst.t7"
 ASR_config: "Utils/ASR/config.yml"

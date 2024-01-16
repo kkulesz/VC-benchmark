@@ -1,14 +1,14 @@
-log_dir: "../../Models/stargan/PolishData"
+log_dir: "../../Models/stargan/DemoData"
 save_freq: 30
 device: "cuda"
-epochs: 300     # default 150
+epochs: 200     # default 150
 batch_size: 12
 pretrained_model: ""
 load_only_params: false
 fp16_run: true
 
-train_data: "../../Data/PolishData-stargan/train_list.txt"
-val_data: "../../Data/PolishData-stargan/val_list.txt"
+train_data: "../../Data/DemoData-stargan/train_list.txt"
+val_data: "../../Data/DemoData-stargan/val_list.txt"
 
 F0_path: "Utils/JDC/bst.t7"
 ASR_config: "Utils/ASR/config.yml"
