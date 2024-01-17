@@ -14,6 +14,8 @@ from models import Generator, MappingNetwork, StyleEncoder
 
 speakers = [273]
 
+device = 'cuda'
+
 
 def __preprocess(wave):
     to_mel = torchaudio.transforms.MelSpectrogram(
@@ -43,15 +45,15 @@ def __compute_style(starganv2, speaker_dicts):
     reference_embeddings = {}
     for key, (path, speaker) in speaker_dicts.items():
         if path == "":
-            label = torch.LongTensor([speaker]).to('cuda')
+            label = torch.LongTensor([speaker]).to(device)
             latent_dim = starganv2.mapping_network.shared[0].in_features
-            ref = starganv2.mapping_network(torch.randn(1, latent_dim).to('cuda'), label)
+            ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
         else:
             wave, sr = librosa.load(path, sr=24000)
             audio, index = librosa.effects.trim(wave, top_db=30)
             if sr != 24000:
                 wave = librosa.resample(wave, sr, 24000)
-            mel_tensor = __preprocess(wave).to('cuda')
+            mel_tensor = __preprocess(wave).to(device)
 
             with torch.no_grad():
                 label = torch.LongTensor([speaker])
@@ -69,37 +71,35 @@ def display(wave, path):
     write(os.path.join(dir_to_save_samples, f"{path}.wav"), 24000, wave)
 
 
-def load_vocoder():
+def load_vocoder(vocoder_path: str):
     from parallel_wavegan.utils import load_model
-    vocoder = load_model("Vocoder/checkpoint-400000steps.pkl").to('cuda').eval()
+    vocoder = load_model(vocoder_path).to(device).eval()
     vocoder.remove_weight_norm()
     _ = vocoder.eval()
     return vocoder
 
 
-def load_stargan():
-    model_path = '../../Models/demodata/epoch_00150.pth'
-
-    with open('Models/config.yml') as f:
+def load_stargan(model_path: str, config_path: str):
+    with open(config_path) as f:
         starganv2_config = yaml.safe_load(f)
     starganv2 = __build_model(model_params=starganv2_config["model_params"])
     params = torch.load(model_path, map_location='cpu')
     params = params['model_ema']
     _ = [starganv2[key].load_state_dict(params[key]) for key in starganv2]
     _ = [starganv2[key].eval() for key in starganv2]
-    starganv2.style_encoder = starganv2.style_encoder.to('cuda')
-    starganv2.mapping_network = starganv2.mapping_network.to('cuda')
-    starganv2.generator = starganv2.generator.to('cuda')
+    starganv2.style_encoder = starganv2.style_encoder.to(device)
+    starganv2.mapping_network = starganv2.mapping_network.to(device)
+    starganv2.generator = starganv2.generator.to(device)
     return starganv2
 
 
 # load F0 model
-def load_f0_model():
+def load_f0_model(fo_model_path: str):
     f0_model = JDCNet(num_class=1, seq_len=192)
-    params = torch.load("Utils/JDC/bst.t7")['net']
+    params = torch.load(fo_model_path)['net']
     f0_model.load_state_dict(params)
     _ = f0_model.eval()
-    f0_model = f0_model.to('cuda')
+    f0_model = f0_model.to(device)
     return f0_model
 
 
@@ -120,7 +120,7 @@ def convert(f0_model, starganv2, vocoder):
     import time
     start = time.time()
 
-    source = __preprocess(audio).to('cuda:0')
+    source = __preprocess(audio).to(device)
     keys = []
     converted_samples = {}
     reconstructed_samples = {}
@@ -131,7 +131,7 @@ def convert(f0_model, starganv2, vocoder):
             f0_feat = f0_model.get_feature_GAN(source.unsqueeze(1))
             out = starganv2.generator(source.unsqueeze(1), ref, F0=f0_feat)
 
-            c = out.transpose(-1, -2).squeeze().to('cuda')
+            c = out.transpose(-1, -2).squeeze().to(device)
             y_out = vocoder.inference(c)
             y_out = y_out.view(-1).cpu()
 
@@ -140,7 +140,7 @@ def convert(f0_model, starganv2, vocoder):
             else:
                 wave, sr = librosa.load(speaker_dicts[key][0], sr=24000)
                 mel = __preprocess(wave)
-                c = mel.transpose(-1, -2).squeeze().to('cuda')
+                c = mel.transpose(-1, -2).squeeze().to(device)
                 recon = vocoder.inference(c)
                 recon = recon.view(-1).cpu().numpy()
 
@@ -163,7 +163,7 @@ def convert(f0_model, starganv2, vocoder):
     print('Original (vocoder):')
     wave, sr = librosa.load(wav_path, sr=24000)
     mel = __preprocess(wave)
-    c = mel.transpose(-1, -2).squeeze().to('cuda')
+    c = mel.transpose(-1, -2).squeeze().to(device)
     with torch.no_grad():
         recon = vocoder.inference(c)
         recon = recon.view(-1).cpu().numpy()
@@ -173,9 +173,14 @@ def convert(f0_model, starganv2, vocoder):
 
 
 def main():
-    f0_model = load_f0_model()
-    stargan = load_stargan()
-    vocoder = load_vocoder()
+    stargan_config_path = "Models/config.yml"
+    stargan_path = "../../Models/demodata/epoch_00150.pth"
+    f0_model_path = "Utils/JDC/bst.t7"
+    vocoder_path = "Vocoder/checkpoint-400000steps.pkl"
+
+    f0_model = load_f0_model(f0_model_path)
+    stargan = load_stargan(stargan_path, stargan_config_path)
+    vocoder = load_vocoder(vocoder_path)
 
     convert(f0_model, stargan, vocoder)
 
