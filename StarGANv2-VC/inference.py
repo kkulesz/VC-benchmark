@@ -1,3 +1,4 @@
+import os.path
 import random
 import yaml
 from munch import Munch
@@ -62,10 +63,9 @@ def __compute_style(starganv2, speaker_dicts):
     return reference_embeddings
 
 
-def display(wave, filename):
+def display(dir_to_save_samples, wave, filename):
     from scipy.io.wavfile import write
     import os
-    dir_to_save_samples = "../../samples"
     os.makedirs(dir_to_save_samples, exist_ok=True)
     print(filename)
     write(os.path.join(dir_to_save_samples, f"{filename}.wav"), 24000, wave)
@@ -103,7 +103,7 @@ def load_f0_model(fo_model_path: str):
     return f0_model
 
 
-def convert(f0_model, starganv2, vocoder, source, targets):
+def convert(f0_model, starganv2, vocoder, source, targets, dir_to_save_samples):
     source_speaker_id, source_wav_path = source
     source_audio, _ = librosa.load(source_wav_path, sr=24000)
     source_audio = source_audio / np.max(np.abs(source_audio))
@@ -141,8 +141,9 @@ def convert(f0_model, starganv2, vocoder, source, targets):
     print('total processing time: %.3f sec\n\n' % (end - start))
 
     for target_speaker_id, wave in converted_samples.items():
-        display(wave, f"converted_{source_speaker_id}_to_{target_speaker_id}")
-        display(reconstructed_samples[target_speaker_id], f'reconstructed_target_{target_speaker_id}_by_vocoder')
+        target_speaker_dir = os.path.join(dir_to_save_samples, target_speaker_id)
+        display(target_speaker_dir, wave, f"converted_{source_speaker_id}_to_{target_speaker_id}")
+        display(target_speaker_dir, reconstructed_samples[target_speaker_id], f'reconstructed_only')
 
     wave, sr = librosa.load(source_wav_path, sr=24000)
     mel = __preprocess(wave)
@@ -151,28 +152,50 @@ def convert(f0_model, starganv2, vocoder, source, targets):
         recon = vocoder.inference(c)
         recon = recon.view(-1).cpu().numpy()
 
-    display(recon, f'reconstructed_source_{source_speaker_id}_by_vocoder')
-    display(wave, f'original_{source_speaker_id}')
+    display(dir_to_save_samples, recon, f'reconstructed_source_{source_speaker_id}_by_vocoder')
+    display(dir_to_save_samples, wave, f'original_{source_speaker_id}')
+
+
+def get_stargan_demodata_20_speakers_data():
+    return (
+        "../../Models/demodata/config.yml",
+        "../../Models/demodata/final_00200_epochs.pth",
+        "Utils/JDC/bst.t7",
+        "Vocoder/checkpoint-400000steps.pkl",
+        ('p273', 'Demo/VCTK-corpus/p273/p273_023.wav'),
+        [
+            ('p230', 'Demo/VCTK-corpus/p230/p230_023.wav'),
+            ('p236', 'Demo/VCTK-corpus/p236/p236_023.wav'),
+            ('p259', 'Demo/VCTK-corpus/p259/p259_023.wav')
+        ],
+        "../../samples/stargan_demodata_20_speakers"
+    )
+
+def get_stargan_polishdata_5_speakers_data():
+    return (
+        "../../Models/\polishdata/config.yml",
+        "../../Models/\polishdata/final_00300_epochs.pth",
+        "Utils/JDC/bst.t7",
+        "Vocoder/checkpoint-400000steps.pkl",
+        ('fair-mls-20', '../../Data/PolishData-stargan/fair-mls-20/1.wav'),
+        [
+            ('mailabs-19', '../../Data/PolishData-stargan/mailabs-19/1.wav'),
+            ('pwr-azon-read-20', '../../Data/PolishData-stargan/pwr-azon-read-20/1.wav'),
+            ('pwr-maleset-unk', '../../Data/PolishData-stargan/pwr-maleset-unk/1.wav')
+        ],
+        "../../samples/stargan_polishdata_5_speakers"
+    )
 
 
 def main():
-    stargan_config_path = "Models/config.yml"
-    stargan_path = "../../Models/demodata/final_00200_epochs.pth"
-    f0_model_path = "Utils/JDC/bst.t7"
-    vocoder_path = "Vocoder/checkpoint-400000steps.pkl"
+    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_demodata_20_speakers_data()
+    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata_5_speakers_data()
+
 
     f0_model = load_f0_model(f0_model_path)
-    stargan = load_stargan(stargan_path, stargan_config_path)
+    stargan = load_stargan(stargan_path, cfg_path)
     vocoder = load_vocoder(vocoder_path)
-
-    source = ('p273', 'Demo/VCTK-corpus/p273/p273_023.wav')
-    target_files = [
-        ('p230', 'Demo/VCTK-corpus/p230/p230_023.wav'),
-        ('p236', 'Demo/VCTK-corpus/p236/p236_023.wav'),
-        ('p259', 'Demo/VCTK-corpus/p259/p259_023.wav')
-    ]
-
-    convert(f0_model, stargan, vocoder, source, target_files)
+    convert(f0_model, stargan, vocoder, source, targets, dir_to_save_samples)
 
 
 if __name__ == '__main__':
