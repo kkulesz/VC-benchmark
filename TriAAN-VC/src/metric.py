@@ -2,7 +2,7 @@ import logging
 from fastdtw import fastdtw
 import librosa
 import numpy as np
-import pysptk
+#import pysptk
 import pyworld as pw
 import scipy
 from scipy.io import wavfile
@@ -10,7 +10,7 @@ from scipy.signal import firwin
 from scipy.signal import lfilter
 from torch._C import ErrorReport
 from tqdm import tqdm
-from src.utils import *
+from utils import *
 
 import jiwer
 import torch

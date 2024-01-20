@@ -1,7 +1,7 @@
-data_path:     ./vctk/wav48_silence_trimmed
-txt_path:      ./vctk/txt
-spk_info_path: ./vctk/speaker-info.txt
-output_path:   ./base_data
+data_path:     ../../Data-raw/VCTK/wav48_silence_trimmed
+txt_path:      ../../Data-raw/VCTK/txt
+spk_info_path: ../../Data-raw/VCTK/speaker-info.txt
+output_path:   ../../Data/VCTK-triann
 cpc_path:      ./cpc
 sampling_rate: 16000
 top_db:        60

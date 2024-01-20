@@ -16,6 +16,9 @@ import argparse
 import soundfile as sf
 import torch
 import kaldiio
+import librosa
+import resampy
+import pyworld as pw
 
 from src.train import *
 from src.dataset import *
@@ -23,6 +26,8 @@ from src.utils import *
 from src.vocoder import decode
 from src.cpc import *
 from config import *
+from preprocess.spectrogram import logmelspectrogram
+from model import TriAANVC
 
 def normalize_lf0(lf0):      
     zero_idxs    = np.where(lf0 == 0)[0]

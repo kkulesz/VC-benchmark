@@ -1,0 +1,3 @@
+cpc/cpc.pt
+vocoder/vocoder.pkl
+checkpoints/*.pth
