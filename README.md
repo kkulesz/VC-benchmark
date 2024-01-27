@@ -23,7 +23,7 @@ Given you are in project root
 >
 > cd StarGANv2-VC
 > 
-> nohup python3 train.py --config_path ./Configs/config.yml &
+> nohup python3 -u train.py --config_path ./Configs/config.yml &
 
 ### most important:
 - preprocessing
@@ -45,7 +45,7 @@ Given you are in project root
 >
 > cd TriAAN-VC
 > 
-> nohup python3 main.py train &
+> nohup python3 -u main.py train &
 
 
 - preprocessing

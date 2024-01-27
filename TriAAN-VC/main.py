@@ -36,13 +36,13 @@ def main(cfg):
         trainer = Trainer(data_loader, cfg)
         trainer.train()
         
-        print('--- Test Phase ---')
-        seed_init(seed=cfg.seed)
-        tester = Tester(cfg)
-        tester.test(set_type='test')
-
-        if cfg.logging:
-            neptune.stop()
+        # print('--- Test Phase ---')
+        # seed_init(seed=cfg.seed)
+        # tester = Tester(cfg)
+        # tester.test(set_type='test')
+        #
+        # if cfg.logging:
+        #     neptune.stop()
 
     else:
         print('--- Test Phase ---')
