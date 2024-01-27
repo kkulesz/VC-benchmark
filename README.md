@@ -19,7 +19,7 @@ For both - me developing and for the future reader
 ## StarGANv2-VC
 ### start training
 Given you are in project root
-> source ../mgr-venv/bin/activate
+> source ../venv-stargan-3.10/bin/activate
 >
 > cd StarGANv2-VC
 > 
@@ -38,11 +38,16 @@ Given you are in project root
   - run `inference.py` with proper paths
 
 
-## FreeVC
-- downsampling necessary both for 16k and 22k https://github.com/OlaWod/FreeVC/issues/33
-- preprocessing (optionals mean you can turn them on/off in settings) 
-1. downsample
-2. preprocess_flist 
-3. (optional) preprocess_spk
-4. (optional) preprocess_ssl
-5. (optional) preprocess_sr
+## TriANN-VC
+### start training
+Given you are in project root
+> source ../venv-triann-3.10/bin/activate
+>
+> cd TriAAN-VC
+> 
+> nohup python3 main.py train &
+
+
+- preprocessing
+  - `preprocess.py` and `preprocess_cpc.py`
+  - REMEMBER TO SET PROPER `base.yaml` and `preprocess.yaml` paths in each file you run!!
