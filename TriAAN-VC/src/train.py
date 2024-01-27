@@ -30,7 +30,7 @@ class Trainer:
         self.train_loader = data['train']
         self.val_loader   = data['valid']
 
-        self.tester = Tester(cfg)
+        # self.tester = Tester(cfg)
 
         # Write param size & [model, conv_module, config files]
         param_size          = count_parameters(self.model)
@@ -93,13 +93,13 @@ class Trainer:
             self._save_checkpoint([val_loss], epoch, opt='last')
             print("epoch: {:03d} | trn loss: {:.4f} | valid loss: {:.4f}".format(epoch, train_loss, val_loss))
 
-            if self.cfg.logging == True:
-                neptune.log_metric('cur epoch', epoch)
-                neptune.log_metric('train loss', train_loss)
-                neptune.log_metric('valid loss', val_loss)
+            # if self.cfg.logging == True:
+            #     neptune.log_metric('cur epoch', epoch)
+            #     neptune.log_metric('train loss', train_loss)
+            #     neptune.log_metric('valid loss', val_loss)
                 
-            if epoch % self.cfg.train.eval_every == 0:
-                self.tester.test(set_type='valid')
+            # if epoch % self.cfg.train.eval_every == 0:
+            #     self.tester.test(set_type='valid')
                 
     def _run_epoch(self, data_loader, valid=False):
         

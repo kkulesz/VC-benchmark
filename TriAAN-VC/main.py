@@ -53,13 +53,13 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, default='train', help='Action') # train / test
-    parser.add_argument('--config', default='./config/base.yaml', help='config yaml file')
+    parser.add_argument('--config', default='./config/base-DemoData.yaml', help='config yaml file')
     parser.add_argument('--num_worker', type=int, default=0, help='Num workers')
     parser.add_argument('--seed', type=int, default=1234, help='seed number')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
     parser.add_argument('--logging', type=bool, default=False, help='Logging option')
     parser.add_argument('--resume', type=bool, default=False, help='Resume option')
-    parser.add_argument('--checkpoint', type=str, default='../../Models/triann/vctk', help='Results save path')
+    parser.add_argument('--checkpoint', type=str, default='../../Models/triann/demodata', help='Results save path')
     parser.add_argument('--model_name', type=str, default='model-best.pth', help='Best model name')
     parser.add_argument('--n_uttr', type=int, default=1, help='Number of target utterances') # default:1 for a fair comparison
     
