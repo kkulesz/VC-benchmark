@@ -16,7 +16,7 @@ setting:
   fmin:          80
   fmax:          7600
   s2s_portion:   0.1
-  eval_spks:     10   # we can specify the test speakers
+  eval_spks:     2   # we can specify the test speakers
   n_frames:      128
 
 model:
@@ -32,7 +32,7 @@ model:
       num_layer:     6
 
 train:
-  epoch:        500
+  epoch:        1000
   batch_size:   48 # maximum for titan
   lr:           1e-4
   loss:         l1
