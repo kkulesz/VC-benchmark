@@ -8,10 +8,10 @@ import subprocess
 import kaldiio
 import neptune
 
-from src.dataset import *
-from src.utils import *
-from src.metric import *
-from src.vocoder import decode
+from .dataset import *
+from .utils import *
+from .metric import *
+from .vocoder import decode
 from model import TriAANVC
 
 class Tester:

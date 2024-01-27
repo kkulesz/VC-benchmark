@@ -9,12 +9,12 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader 
 import torchaudio
 
-from src.dataset import *
-from src.utils import *
+# from dataset import *
+from .utils import *
 
 from model import TriAANVC
-from src.evaluation import *
-from src.augment import *
+from .evaluation import *
+from .augment import *
 from tqdm import tqdm
 
 class Trainer:

@@ -10,7 +10,7 @@ from scipy.signal import firwin
 from scipy.signal import lfilter
 from torch._C import ErrorReport
 from tqdm import tqdm
-from utils import *
+from .utils import *
 
 import jiwer
 import torch
