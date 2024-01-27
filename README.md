@@ -2,9 +2,7 @@
 
 Models used:
 - StarGANv2-VC - https://github.com/yl4579/StarGANv2-VC / https://arxiv.org/abs/2107.10394
-  - works on demo deta!!! 
-- FreeVC - https://github.com/OlaWod/FreeVC / https://arxiv.org/abs/2210.15418
-  - todo: train and inference with model trained by me
+  - works on demo deta!!!
 - CVC -https://github.com/Tinglok/CVC / https://arxiv.org/abs/2011.00782
   - waiting: python 3.6 needed to be installed on titan
 - TriAAN-VC - https://github.com/winddori2002/TriAAN-VC / https://arxiv.org/abs/2303.09057
