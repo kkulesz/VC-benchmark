@@ -37,7 +37,6 @@ def main(cfg):
         modes = ['train', 'valid', 'test']
         for mode in modes:
             metadata = Read_json(data_path/f'{mode}.json')
-
             for i in tqdm(range(len(metadata))):
                 wav       = _load_wav(metadata[i]['wav_path']).cuda()
                 feat      =  cpc(wav, None)[0].squeeze().detach().cpu().numpy()
@@ -51,5 +50,5 @@ def main(cfg):
 
 if __name__ == '__main__':
     
-    cfg = Config('./config/base.yaml')
+    cfg = Config('./config/base-DemoData.yaml')
     main(cfg)

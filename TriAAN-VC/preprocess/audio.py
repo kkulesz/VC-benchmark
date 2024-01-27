@@ -29,12 +29,11 @@ def ProcessingTrainData(path, cfg):
     """
         For multiprocess function binding load wav and log-mel 
     """
-    wav_name = os.path.basename(path).split('.')[0]
-    speaker  = wav_name.split('_')[0]
+    wav_path = path
+    speaker  = path.split('/')[-2]
     sr       = cfg.sampling_rate
     wav, fs  = sf.read(path)
     wav, _   = librosa.effects.trim(y=wav, top_db=cfg.top_db) # trim slience
-
     if fs != sr:
         wav = resampy.resample(x=wav, sr_orig=fs, sr_new=sr, axis=0)
         fs  = sr
@@ -67,7 +66,7 @@ def ProcessingTrainData(path, cfg):
     lf0                   = f0.copy()
     lf0[nonzeros_indices] = np.log(f0[nonzeros_indices]) # for f0(Hz), lf0 > 0 when f0 != 0
     
-    return wav_name, mel, lf0, mel.shape[0], speaker
+    return wav_path, mel, lf0, mel.shape[0], speaker
 
 def LoadWav(path, cfg):
     
@@ -75,7 +74,7 @@ def LoadWav(path, cfg):
         load raw wav from the path -> processed wav
     """
     # skip pre-emphasis
-    wav_name = os.path.basename(path).split('.')[0]
+    wav_name = os.path.basename(path)
     sr       = cfg.sampling_rate
     wav, fs  = sf.read(path)
     wav, _   = librosa.effects.trim(y=wav, top_db=cfg.top_db) # trim slience
@@ -142,7 +141,7 @@ def TextCheck(wavs, cfg):
     return revised_wavs
 
 def GetSpeakerInfo(cfg):
-    
+
     spk_info = open(cfg.spk_info_path, 'r')
     gen2spk  = {}
     all_spks = []
@@ -157,17 +156,24 @@ def GetSpeakerInfo(cfg):
             if gen not in gen2spk:
                 gen2spk[gen] = [spk]
             else:
-                gen2spk[gen].append(spk)    
-    
+                gen2spk[gen].append(spk)
+
     print(f'Total speaker: {len(all_spks)} with Female: {len(gen2spk["F"])} and Male: {len(gen2spk["M"])}')
     
     return all_spks, gen2spk
+
+
+def GetSpeakers(cfg):
+    all_files = os.listdir(cfg.data_path)
+    all_spks = list(filter(lambda f: os.path.isdir(os.path.join(cfg.data_path, f)), all_files))
+
+    return all_spks
 
 def SplitDataset(all_spks, cfg):
     
     all_spks = sorted(all_spks)
     random.shuffle(all_spks)
-    train_spks = all_spks[:-cfg.eval_spks * 2] # except valid and test unseen speakers
+    train_spks = all_spks[:-cfg.eval_spks * 2]  # except valid and test unseen speakers
     valid_spks = all_spks[-cfg.eval_spks * 2:-cfg.eval_spks]
     test_spks  = all_spks[-cfg.eval_spks:]
 
@@ -176,34 +182,33 @@ def SplitDataset(all_spks, cfg):
     test_wavs_names  = []
     
     for spk in train_spks:
-        spk_wavs       = glob(f'{cfg.data_path}/{spk}/*mic1*')
-        spk_wavs_names = [os.path.basename(p).split('.')[0] for p in spk_wavs]
-        valid_names    = random.sample(spk_wavs_names, int(len(spk_wavs_names) * cfg.s2s_portion))
-        train_names    = [n for n in spk_wavs_names if n not in valid_names]
-        test_names     = random.sample(train_names, int(len(spk_wavs_names) * cfg.s2s_portion))
-        train_names    = [n for n in train_names if n not in test_names]
+        spk_wavs       = glob(f'{cfg.data_path}/{spk}/*.wav')
+        spk_wavs_names = [os.path.basename(p) for p in spk_wavs]
+        # valid_names    = random.sample(spk_wavs_names, int(len(spk_wavs_names) * cfg.s2s_portion))
+        # train_names    = [n for n in spk_wavs_names if n not in valid_names]
+        # test_names     = random.sample(train_names, int(len(spk_wavs_names) * cfg.s2s_portion))
+        # train_names    = [n for n in train_names if n not in test_names]
 
-        train_wavs_names += train_names
-        valid_wavs_names += valid_names
-        test_wavs_names  += test_names
+        train_wavs_names += spk_wavs
+        # valid_wavs_names += valid_names
+        # test_wavs_names  += test_names
 
     for spk in valid_spks:
-        spk_wavs         = glob(f'{cfg.data_path}/{spk}/*mic1*')
-        spk_wavs_names   = [os.path.basename(p).split('.')[0] for p in spk_wavs]
-        valid_wavs_names += spk_wavs_names
+        spk_wavs         = glob(f'{cfg.data_path}/{spk}/*.wav')
+        spk_wavs_names   = [os.path.basename(p) for p in spk_wavs]
+        valid_wavs_names += spk_wavs
 
     for spk in test_spks:
-        spk_wavs        = glob(f'{cfg.data_path}/{spk}/*mic1*')
-        spk_wavs_names  = [os.path.basename(p).split('.')[0] for p in spk_wavs]
-        test_wavs_names += spk_wavs_names
+        spk_wavs        = glob(f'{cfg.data_path}/{spk}/*.wav')
+        spk_wavs_names  = [os.path.basename(p) for p in spk_wavs]
+        test_wavs_names += spk_wavs
     
-    all_wavs         = glob(f'{cfg.data_path}/*/*mic1.flac')
-    train_wavs_names = TextCheck(train_wavs_names, cfg) # delete the wavs which don't have text files
-    valid_wavs_names = TextCheck(valid_wavs_names, cfg)
-    test_wavs_names  = TextCheck(test_wavs_names, cfg)
+    all_wavs         = glob(f'{cfg.data_path}/*/*.wav')
+    # train_wavs_names = TextCheck(train_wavs_names, cfg) # delete the wavs which don't have text files
+    # valid_wavs_names = TextCheck(valid_wavs_names, cfg)
+    # test_wavs_names  = TextCheck(test_wavs_names, cfg)
     
     print(f'Total files: {len(all_wavs)}, Train: {len(train_wavs_names)}, Valid: {len(valid_wavs_names)}, Test: {len(test_wavs_names)}, Del Files: {len(all_wavs)-len(train_wavs_names)-len(valid_wavs_names)-len(test_wavs_names)}')
-    
     return all_wavs, train_wavs_names, valid_wavs_names, test_wavs_names
 
 def GetMetaResults(train_results, valid_results, test_results, cfg):
@@ -318,10 +323,10 @@ def ExtractMelstats(wn2info, train_wavs_names, cfg):
     
     return mean, std
 
-def SaveFeatures(wav_name, info, mode, cfg):
+def SaveFeatures(wav_path, info, mode, cfg):
     
     mel, lf0, mel_len, speaker = info
-    wav_path      = f'{cfg.data_path}/{speaker}/{wav_name}.flac' # can change to special char *
+    wav_name = os.path.basename(wav_path)
     mel_save_path = f'{cfg.output_path}/{mode}/mels/{speaker}/{wav_name}.npy'
     lf0_save_path = f'{cfg.output_path}/{mode}/lf0/{speaker}/{wav_name}.npy'
     
@@ -329,8 +334,11 @@ def SaveFeatures(wav_name, info, mode, cfg):
     os.makedirs(os.path.dirname(lf0_save_path), exist_ok=True)
     np.save(mel_save_path, mel)
     np.save(lf0_save_path, lf0)
-    
-    wav_name = wav_name.split('_mic')[0] # p231_001
 
-    return {'mel_len':mel_len, 'speaker':speaker, 'wav_name':wav_name, 'wav_path':wav_path, 'mel_path':mel_save_path, 'lf0_path':lf0_save_path}
+    return {'mel_len': mel_len,
+            'speaker': speaker,
+            'wav_name': wav_name,
+            'wav_path': wav_path,
+            'mel_path': mel_save_path,
+            'lf0_path': lf0_save_path}
     
