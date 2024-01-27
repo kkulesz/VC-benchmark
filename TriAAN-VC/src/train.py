@@ -75,7 +75,6 @@ class Trainer:
         
         best_loss = 1000000
         for epoch in range(1, self.cfg.train.epoch+1):
-            
             self.model.train()
             train_loss = self._run_epoch(self.train_loader)               
 
@@ -104,8 +103,8 @@ class Trainer:
     def _run_epoch(self, data_loader, valid=False):
         
         total_loss = 0 
-        for i, batch in enumerate(tqdm(data_loader)):
-            
+        # for i, batch in enumerate(tqdm(data_loader)):
+        for i, batch in enumerate(data_loader):
             src_feat = batch['feat'].to(self.cfg.device)
             src_lf0  = batch['lf0'].to(self.cfg.device)
             src_mel  = batch['mel'].to(self.cfg.device)
