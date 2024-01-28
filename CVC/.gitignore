@@ -1,5 +1,0 @@
-checkpoints/vocoder/checkpoint-1000000steps.pkl
-*.pth
-**/test_opt.txt
-**/train_opt.txt
-**/loss_log.txt
