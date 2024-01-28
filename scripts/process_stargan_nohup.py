@@ -12,7 +12,7 @@ def filter_lines_and_split_train_eval(lines: List[str]) -> Tuple[List[str], List
     lines = list(filter(lambda l: not l.startswith("{"), lines))
     lines = list(filter(lambda l: "time:" not in l, lines))
 
-    train_lines = list(filter(lambda l: l.startswith("train"), lines))
+    train_lines = list(filter(lambda l: l.startswith("train:"), lines))
     eval_lines = list(filter(lambda l: l.startswith("eval"), lines))
     # print(len(train_lines))
     # print(len(eval_lines))
@@ -46,7 +46,7 @@ def process_lines_into_df(lines: List[str]):
 
 
 def main():
-    nohup_path = "../StarGANv2-VC/Models/2024-01-05-demo-data-20-speakers/nohup.out"
+    nohup_path = "../../Models/stargan/demodata/nohup.out"
     lines = read_lines(nohup_path)
     train_lines, eval_lines = filter_lines_and_split_train_eval(lines)
 
