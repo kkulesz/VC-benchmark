@@ -98,15 +98,21 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
     model.eval()
     with torch.no_grad():
         source_speaker_id, source_path = source
+        src_wav_np, src_mel, src_lf0_np = GetTestData(source_path, cfg.setting)
+        feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=save_dir + '/feats.1'))
+        feat_writer[os.path.join(save_dir, "source")] = src_mel
+        feat_writer.close()
+        decode(f'{save_dir}/feats.1.scp', save_dir, cfg.device)
+        os.remove(f'{save_dir}/feats.1.scp')
+        os.remove(f'{save_dir}/feats.1.ark')
         for target_speaker_id, target_path in targets:
-            src_wav, src_mel, src_lf0 = GetTestData(source_path, cfg.setting)
-            trg_wav, trg_mel, _       = GetTestData(target_path, cfg.setting)
+            trg_wav_np, trg_mel, _ = GetTestData(target_path, cfg.setting)
             if cfg.train.cpc:
                 cpc_model = load_cpc(f'{cfg.cpc_path}/cpc.pt').to(cfg.device)
                 cpc_model.eval()
                 with torch.no_grad():
-                    src_wav  = torch.from_numpy(src_wav).unsqueeze(0).unsqueeze(0).float().to(cfg.device)
-                    trg_wav  = torch.from_numpy(trg_wav).unsqueeze(0).unsqueeze(0).float().to(cfg.device)
+                    src_wav  = torch.from_numpy(src_wav_np).unsqueeze(0).unsqueeze(0).float().to(cfg.device)
+                    trg_wav  = torch.from_numpy(trg_wav_np).unsqueeze(0).unsqueeze(0).float().to(cfg.device)
                     src_feat = cpc_model(src_wav, None)[0].transpose(1,2)
                     trg_feat = cpc_model(trg_wav, None)[0].transpose(1,2)
             else:
@@ -114,24 +120,28 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
                 trg_feat = (trg_mel.T - mean) / (std + 1e-8)
                 src_feat = torch.from_numpy(src_feat).unsqueeze(0).to(cfg.device)
                 trg_feat = torch.from_numpy(trg_feat).unsqueeze(0).to(cfg.device)
-            src_lf0 = torch.from_numpy(normalize_lf0(src_lf0)).unsqueeze(0).to(cfg.device)
+            src_lf0 = torch.from_numpy(normalize_lf0(src_lf0_np)).unsqueeze(0).to(cfg.device)
 
+            converted_target_dir_path = os.path.join(save_dir, target_speaker_id)
+            os.makedirs(converted_target_dir_path)
             cnv_name = f'from_{source_speaker_id}_to_{target_speaker_id}'
+            converted_target_file_path = os.path.join(converted_target_dir_path, cnv_name)
 
             output = model(src_feat, src_lf0, trg_feat)
             output = output.squeeze(0).cpu().numpy().T * (std.squeeze(1) + 1e-8) + mean.squeeze(1)
-            output_list.append([cnv_name, output, src_mel, trg_mel])
+            output_list.append([converted_target_file_path, output, trg_mel])
 
-    # Mel-spectrograms to Wavs
-    feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=save_dir+'/feats.1'))
-    for (filename, output, src_mel, trg_mel) in output_list:
-        feat_writer[filename + '_cnv'] = output
-        feat_writer[filename + '_src'] = src_mel
-        feat_writer[filename + '_trg'] = trg_mel
+            # Mel-spectrograms to Wavs
+            feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=converted_target_dir_path+'/feats.1'))
+            for (filename, output, trg_mel) in output_list:
+                feat_writer[filename + '_cnv'] = output
+                feat_writer[filename + '_trg'] = trg_mel
 
-    feat_writer.close()
-    print('synthesize waveform...')
-    decode(f'{save_dir}/feats.1.scp', save_dir, cfg.device)
+            feat_writer.close()
+            print('synthesize waveform...')
+            decode(f'{converted_target_dir_path}/feats.1.scp', save_dir, cfg.device)
+            os.remove(f'{converted_target_dir_path}/feats.1.scp')
+            os.remove(f'{converted_target_dir_path}/feats.1.ark')
 
 def get_stargan_demodata_20_speakers_data():
     return (
@@ -140,7 +150,9 @@ def get_stargan_demodata_20_speakers_data():
         "../../Models/triann/demodata/mel_stats.npy",
         ('p273', '../../Data/DemoData/p273/1.wav'),
         [
-            ('p230', '../../Data/DemoData/p230/1.wav')
+            ('p230', '../../Data/DemoData/p230/1.wav'),
+            ('p236', '../../Data/DemoData/p236/1.wav'),
+            ('p259', '../../Data/DemoData/p259/1.wav')
         ],
         "../../samples/triann_demodata_20_speakers"
     )
