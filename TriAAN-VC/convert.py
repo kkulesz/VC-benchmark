@@ -83,11 +83,10 @@ def GetTestData(path, cfg):
     
     return wav, mel, lf0
 
-def main(cfg):
-    
+def main(cfg, mel_stats_path, source, targets, save_dir):
     seed_init(seed=cfg.seed)
     
-    mel_stats = np.load(cfg.data_path + '/mel_stats.npy')
+    mel_stats = np.load(mel_stats_path)
     mean      = np.expand_dims(mel_stats[0], -1)
     std       = np.expand_dims(mel_stats[1], -1)
     
@@ -98,10 +97,10 @@ def main(cfg):
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
     with torch.no_grad():
-        for src_name, trg_name in zip(cfg.src_name, cfg.trg_name):
-
-            src_wav, src_mel, src_lf0 = GetTestData(f'{cfg.sample_path}/{src_name}', cfg.setting)
-            trg_wav, trg_mel, _       = GetTestData(f'{cfg.sample_path}/{trg_name}', cfg.setting)
+        source_speaker_id, source_path = source
+        for target_speaker_id, target_path in targets:
+            src_wav, src_mel, src_lf0 = GetTestData(source_path, cfg.setting)
+            trg_wav, trg_mel, _       = GetTestData(target_path, cfg.setting)
             if cfg.train.cpc:
                 cpc_model = load_cpc(f'{cfg.cpc_path}/cpc.pt').to(cfg.device)
                 cpc_model.eval()
@@ -111,43 +110,53 @@ def main(cfg):
                     src_feat = cpc_model(src_wav, None)[0].transpose(1,2)
                     trg_feat = cpc_model(trg_wav, None)[0].transpose(1,2)
             else:
-                src_feat = (src_mel.T - mean) / (std + 1e-8) 
+                src_feat = (src_mel.T - mean) / (std + 1e-8)
                 trg_feat = (trg_mel.T - mean) / (std + 1e-8)
                 src_feat = torch.from_numpy(src_feat).unsqueeze(0).to(cfg.device)
                 trg_feat = torch.from_numpy(trg_feat).unsqueeze(0).to(cfg.device)
             src_lf0 = torch.from_numpy(normalize_lf0(src_lf0)).unsqueeze(0).to(cfg.device)
-                
-            src_name = src_name.split('.')[0]
-            trg_name = trg_name.split('.')[0]
-            cnv_name = f'from_{src_name}_to_{trg_name}'
-            
+
+            cnv_name = f'from_{source_speaker_id}_to_{target_speaker_id}'
+
             output = model(src_feat, src_lf0, trg_feat)
             output = output.squeeze(0).cpu().numpy().T * (std.squeeze(1) + 1e-8) + mean.squeeze(1)
             output_list.append([cnv_name, output, src_mel, trg_mel])
-        
+
     # Mel-spectrograms to Wavs
-    feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=str(cfg.sample_path)+'/feats.1'))
+    feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=save_dir+'/feats.1'))
     for (filename, output, src_mel, trg_mel) in output_list:
         feat_writer[filename + '_cnv'] = output
         feat_writer[filename + '_src'] = src_mel
         feat_writer[filename + '_trg'] = trg_mel
-   
+
     feat_writer.close()
     print('synthesize waveform...')
-    decode(f'{str(cfg.sample_path)}/feats.1.scp', cfg.sample_path, cfg.device)
+    decode(f'{save_dir}/feats.1.scp', save_dir, cfg.device)
 
+def get_stargan_demodata_20_speakers_data():
+    return (
+        "../../Models/triann/demodata/base-DemoData.yaml",
+        "../../Models/triann/demodata/model-best.pth",
+        "../../Models/triann/demodata/mel_stats.npy",
+        ('p273', '../../Data/DemoData/p273/1.wav'),
+        [
+            ('p230', '../../Data/DemoData/p230/1.wav')
+        ],
+        "../../samples/triann_demodata_20_speakers"
+    )
 
 if __name__ == "__main__":
+    cfg, model, mel_stats_path, source, targets, save_dir = get_stargan_demodata_20_speakers_data()
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='./config/base.yaml', help='config yaml file')
+    parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
-    parser.add_argument('--sample_path', type=str, default='./samples', help='Sample path')
-    parser.add_argument('--src_name', type=str, nargs='+', default=['src.flac'], help='Sample source name')
-    parser.add_argument('--trg_name', type=str, nargs='+', default=['trg.flac'], help='Sample target name')
+    # parser.add_argument('--sample_path', type=str, default='./samples', help='Sample path')
+    # parser.add_argument('--src_name', type=str, nargs='+', default=['src.flac'], help='Sample source name')
+    # parser.add_argument('--trg_name', type=str, nargs='+', default=['trg.flac'], help='Sample target name')
 
-    parser.add_argument('--checkpoint', type=str, default='./checkpoints', help='Results load path')
-    parser.add_argument('--model_name', type=str, default='model-cpc-split.pth', help='Best model name')
+    parser.add_argument('--checkpoint', type=str, default=save_dir, help='Results load path')
+    parser.add_argument('--model_name', type=str, default=model, help='Best model name')
     parser.add_argument('--seed', type=int, default=1234, help='Seed')
     
     args = parser.parse_args()
@@ -155,4 +164,4 @@ if __name__ == "__main__":
     cfg  = set_experiment(args, cfg)
     print(cfg)
    
-    main(cfg)
+    main(cfg, mel_stats_path, source, targets, save_dir)
