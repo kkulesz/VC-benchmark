@@ -12,7 +12,7 @@ import fnmatch
 from statistics import mean 
 
 import tensorflow as tf
-from tensorflow import keras
+# from tensorflow import keras
 from model import CNN_BLSTM
 
 import utils   
@@ -40,11 +40,11 @@ def find_files(root_dir, query="*.wav", include_root_dir=True):
 
     return files
 
-def main():
+def main(directory):
     parser = argparse.ArgumentParser(
         description="Evaluate custom waveform files using pretrained MOSnet.")
-    parser.add_argument("--rootdir", default=None, type=str,
-                        help="rootdir of the waveforms to be evaluated")
+    # parser.add_argument("--rootdir", default=None, type=str,
+    #                     help="rootdir of the waveforms to be evaluated")
     parser.add_argument("--pretrained_model", default="./pre_trained/cnn_blstm.h5", type=str,
                         help="pretrained model file")
     args = parser.parse_args()
@@ -73,9 +73,9 @@ def main():
             print(e)
 
     ###################################
-    
+    print(os.listdir(directory))
     # find waveform files
-    wavfiles = sorted(find_files(args.rootdir, "*.wav"))
+    wavfiles = sorted(find_files(directory, "*.wav"))
     
     # init model
     print("Loading model weights")
@@ -106,10 +106,11 @@ def main():
     print("Average: {}".format(average))
     
     # write final raw result
-    resultrawpath = os.path.join(args.rootdir, "MOSnet_result_raw.txt")
+    resultrawpath = os.path.join(directory, "MOSnet_result_raw.txt")
     with open(resultrawpath, "w") as outfile:
         outfile.write("\n".join(sorted(results)))
         outfile.write("\nAverage: {}\n".format(average))
 
 if __name__ == '__main__':
-    main()
+    directory = "../../../samples/triann_demodata_20_speakers/p230"
+    main(directory)
