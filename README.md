@@ -7,6 +7,8 @@ Models used:
   - works!!!
 - DYGAN - https://github.com/MingjieChen/DYGANVC / https://arxiv.org/abs/2203.17172
   - TODO
+- Diff-HierVC - https://github.com/hayeong0/Diff-HierVC / https://arxiv.org/abs/2311.04693
+  - TODO: inference, training own model, inference with own model
 
 Other repositories used:
 - mcd - https://github.com/MattShannon/mcd
