@@ -1,9 +1,25 @@
 amfm_decompy==1.0.11
 einops==0.7.0
-natten==0.14.6
 numpy==1.21.4
 scipy==1.6.3
-torch==1.11.0+cu113
-torchaudio==0.11.0+cu113
+#torch==1.11.0+cu113
+#torchaudio==0.11.0+cu113
 tqdm==4.62.3
 transformers==4.35.0
+
+## MyComputer has cuda 12.2
+#-i https://download.pytorch.org/whl/cu121
+#torchaudio
+#torch
+
+
+## TitanV has cuda 11.4
+#-i https://download.pytorch.org/whl/cu113
+#torch==1.12.1+cu113
+#torchaudio==0.12.1+cu113
+
+
+
+#natten==0.14.6 # doesn't work like that - check out: https://github.com/SHI-Labs/NATTEN
+# For Titan
+# pip3 install natten==0.14.6+torch1121cu113 -f https://shi-labs.com/natten/wheels

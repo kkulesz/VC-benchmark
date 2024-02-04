@@ -114,13 +114,19 @@ def inference(a):
     out = os.path.join(a.output_dir, f_name)
     save_audio(converted_audio, out)   
 
+def get_demo_default_args():
+    src = './sample/src_p241_004.wav'
+    trg = './sample/tar_p239_022.wav'
+    return src, trg
+
 
 def main(): 
     print('>> Initializing Inference Process...')
+    src, trg = get_demo_default_args()
      
     parser = argparse.ArgumentParser()
-    parser.add_argument('--src_path', type=str, default='/workspace/ha0/data/src.wav')  
-    parser.add_argument('--trg_path', type=str, default='/workspace/ha0/data/tar.wav')  
+    parser.add_argument('--src_path', type=str, default=src)
+    parser.add_argument('--trg_path', type=str, default=trg)
     parser.add_argument('--ckpt_model', type=str, default='./ckpt/model_diffhier.pth')
     parser.add_argument('--voc', type=str, default='bigvgan')  
     parser.add_argument('--ckpt_voc', type=str, default='./vocoder/voc_bigvgan.pth')  
