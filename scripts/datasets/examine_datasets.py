@@ -83,8 +83,8 @@ def print_dataset_statistics(dataset_df):
 
 
 def filter_speakers(df):
-    df = df[df['number_of_wavs'] > 75]
-    df = df[df['total_length'] > 600]
+    # df = df[df['number_of_wavs'] > 75]
+    df = df[df['total_length'] > 240]
     return df
 
 
