@@ -1,5 +1,5 @@
-data_path:     ../../Data/DemoData
-output_path:   ../../Data/DemoData-triann
+data_path:     ../../Data/DemoData-2-splitted\TRAIN
+output_path:   ../../Data/DemoData-TRIANN-TRAIN
 cpc_path:      ./cpc
 sampling_rate: 16000
 top_db:        60

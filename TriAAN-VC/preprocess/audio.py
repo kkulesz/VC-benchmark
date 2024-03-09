@@ -9,6 +9,7 @@
 import warnings
 warnings.filterwarnings(action='ignore')
 
+import platform
 import os
 from os.path import join as opj
 import json
@@ -30,7 +31,10 @@ def ProcessingTrainData(path, cfg):
         For multiprocess function binding load wav and log-mel 
     """
     wav_path = path
-    speaker  = path.split('/')[-2]
+    if platform.system() == "Windows":
+        speaker = path.split('\\')[-2]
+    else:
+        speaker = path.split('/')[-2]
     sr       = cfg.sampling_rate
     wav, fs  = sf.read(path)
     wav, _   = librosa.effects.trim(y=wav, top_db=cfg.top_db) # trim slience
@@ -173,17 +177,19 @@ def SplitDataset(all_spks, cfg):
     
     all_spks = sorted(all_spks)
     random.shuffle(all_spks)
-    train_spks = all_spks[:-cfg.eval_spks * 2]  # except valid and test unseen speakers
-    valid_spks = all_spks[-cfg.eval_spks * 2:-cfg.eval_spks]
-    test_spks  = all_spks[-cfg.eval_spks:]
+    # train_spks = all_spks[:-cfg.eval_spks * 2]  # except valid and test unseen speakers
+    # valid_spks = all_spks[-cfg.eval_spks * 2:-cfg.eval_spks]
+    # test_spks  = all_spks[-cfg.eval_spks:]
+    train_spks = all_spks[:-cfg.eval_spks]
+    valid_spks = all_spks[-cfg.eval_spks:]
 
     train_wavs_names = []
     valid_wavs_names = []
-    test_wavs_names  = []
+    # test_wavs_names  = []
     
     for spk in train_spks:
         spk_wavs       = glob(f'{cfg.data_path}/{spk}/*.wav')
-        spk_wavs_names = [os.path.basename(p) for p in spk_wavs]
+        spk_wavs_names = [os.path.normpath(os.path.basename(p)) for p in spk_wavs]
         # valid_names    = random.sample(spk_wavs_names, int(len(spk_wavs_names) * cfg.s2s_portion))
         # train_names    = [n for n in spk_wavs_names if n not in valid_names]
         # test_names     = random.sample(train_names, int(len(spk_wavs_names) * cfg.s2s_portion))
@@ -195,21 +201,24 @@ def SplitDataset(all_spks, cfg):
 
     for spk in valid_spks:
         spk_wavs         = glob(f'{cfg.data_path}/{spk}/*.wav')
-        spk_wavs_names   = [os.path.basename(p) for p in spk_wavs]
+        spk_wavs_names   = [os.path.normpath(os.path.basename(p)) for p in spk_wavs]
         valid_wavs_names += spk_wavs
 
-    for spk in test_spks:
-        spk_wavs        = glob(f'{cfg.data_path}/{spk}/*.wav')
-        spk_wavs_names  = [os.path.basename(p) for p in spk_wavs]
-        test_wavs_names += spk_wavs
+    # for spk in test_spks:
+    #     spk_wavs        = glob(f'{cfg.data_path}/{spk}/*.wav')
+    #     spk_wavs_names  = [os.path.basename(p) for p in spk_wavs]
+    #     test_wavs_names += spk_wavs
     
     all_wavs         = glob(f'{cfg.data_path}/*/*.wav')
+    all_wavs         = list(map(lambda p: os.path.normpath(p), all_wavs))
     # train_wavs_names = TextCheck(train_wavs_names, cfg) # delete the wavs which don't have text files
     # valid_wavs_names = TextCheck(valid_wavs_names, cfg)
     # test_wavs_names  = TextCheck(test_wavs_names, cfg)
     
-    print(f'Total files: {len(all_wavs)}, Train: {len(train_wavs_names)}, Valid: {len(valid_wavs_names)}, Test: {len(test_wavs_names)}, Del Files: {len(all_wavs)-len(train_wavs_names)-len(valid_wavs_names)-len(test_wavs_names)}')
-    return all_wavs, train_wavs_names, valid_wavs_names, test_wavs_names
+    # print(f'Total files: {len(all_wavs)}, Train: {len(train_wavs_names)}, Valid: {len(valid_wavs_names)}, Test: {len(test_wavs_names)}, Del Files: {len(all_wavs)-len(train_wavs_names)-len(valid_wavs_names)-len(test_wavs_names)}')
+    print(f'Total files: {len(all_wavs)}, Train: {len(train_wavs_names)}, Valid: {len(valid_wavs_names)}, Del Files: {len(all_wavs)-len(train_wavs_names)-len(valid_wavs_names)}')
+    # return all_wavs, train_wavs_names, valid_wavs_names, test_wavs_names
+    return all_wavs, train_wavs_names, valid_wavs_names
 
 def GetMetaResults(train_results, valid_results, test_results, cfg):
     """
@@ -311,6 +320,7 @@ def ExtractMelstats(wn2info, train_wavs_names, cfg):
     
     mels = []
     for wav_name in train_wavs_names:
+        wav_name = os.path.normpath(wav_name)
         mel, *_ = wn2info[wav_name]
         mels.append(mel)   
         
@@ -326,6 +336,7 @@ def ExtractMelstats(wn2info, train_wavs_names, cfg):
 def SaveFeatures(wav_path, info, mode, cfg):
     
     mel, lf0, mel_len, speaker = info
+    wav_path = os.path.normpath(wav_path)
     wav_name = os.path.basename(wav_path)
     mel_save_path = f'{cfg.output_path}/{mode}/mels/{speaker}/{wav_name}.npy'
     lf0_save_path = f'{cfg.output_path}/{mode}/lf0/{speaker}/{wav_name}.npy'
