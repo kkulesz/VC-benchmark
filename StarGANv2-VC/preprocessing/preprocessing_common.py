@@ -80,19 +80,20 @@ def __save_in_proper_form(df, output_path, file_name):
     text_file.close()
 
 
-def __shuffle_split_and_save_txts(output_path, df):
+def __shuffle_split_and_save_txts(output_path, df, save_txt: bool):
     df = df.sample(frac=1)
     split_idx = round(len(df) * 0.1)
 
     test_data = df[:split_idx]
     train_data = df[split_idx:]
-    __save_in_proper_form(test_data, output_path, "val_list.txt")
-    __save_in_proper_form(train_data, output_path, "train_list.txt")
+    if save_txt:
+        __save_in_proper_form(test_data, output_path, "val_list.txt")
+        __save_in_proper_form(train_data, output_path, "train_list.txt")
 
 
-def preprocess(input_dir, output_dir, speakers):
+def preprocess(input_dir, output_dir, speakers, save_txt: bool):
     for s in speakers:
         print(f"Preprocessing: {s}")
         __downsample_to_25khz_and_save_to_wav(input_dir=input_dir, output_dir=output_dir, speaker=s)
     df = __get_df(output_dir=output_dir, speakers=speakers)
-    __shuffle_split_and_save_txts(output_dir, df)
+    __shuffle_split_and_save_txts(output_dir, df, save_txt)

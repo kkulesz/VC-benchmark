@@ -88,16 +88,16 @@ def split(dataset_path: str, unseen_spks: List[str], train_ratio_prc: int, save_
         assert len(test_split) > 0
 
         seen_speakers_splits[s] = (train_split, test_split)
-    print(seen_speakers_splits)
+    # print(seen_speakers_splits)
     _save(dataset_path, unseen_spks, save_dir, seen_speakers_splits)
 
 
 def get_demodata_info():
-    dataset_path = "../../../../Data/DemoData"
-    unseen_speakers = ['p225']
+    dataset_path = "../../../../Data/DemoData-1-even-recs"
+    unseen_speakers = ['p225', 'p239', 'p228', 'p273', 'p254']
     speaker_train_ratio_perc = 95
 
-    save_dir = "../../../../Data/DemoData-splitted"
+    save_dir = "../../../../Data/DemoData-2-splitted"
 
     return dataset_path, unseen_speakers, speaker_train_ratio_perc, save_dir
 
