@@ -101,19 +101,20 @@ def get_demodata_info():
 
     return dataset_path, unseen_speakers, speaker_train_ratio_perc, save_dir
 
-# TODO
-# def get_polishdata_info():
-#     dataset_path = "../../../../Data/PolishData-stargan"
-#     unseen_speakers = ['pwr-viu-unk', ]
-#     speaker_train_ratio_perc = 95
-#
-#     save_dir = "../../../../Data/DemoData-splitted"
-#
-#     return dataset_path, unseen_speakers, speaker_train_ratio_perc, save_dir
+
+def get_polishdata_info():
+    dataset_path = "../../../../Data/PolishData-1-even-recs"
+    unseen_speakers = ['clarin-pjatk-mobile-15~0003', 'clarin-pjatk-mobile-15~0004', 'clarin-pjatk-studio-15~0001', 'pwr-azon-spont-20~99317', 'fair-mls-20~8758']
+    speaker_train_ratio_perc = 95
+
+    save_dir = "../../../../Data/PolishData-2-splitted"
+
+    return dataset_path, unseen_speakers, speaker_train_ratio_perc, save_dir
 
 
 def main():
-    dataset_path, unseen_speakers, train_ratio_prc, save_dir = get_demodata_info()
+    # dataset_path, unseen_speakers, train_ratio_prc, save_dir = get_demodata_info()
+    dataset_path, unseen_speakers, train_ratio_prc, save_dir = get_polishdata_info()
 
     split(dataset_path, unseen_speakers, train_ratio_prc, save_dir)
 

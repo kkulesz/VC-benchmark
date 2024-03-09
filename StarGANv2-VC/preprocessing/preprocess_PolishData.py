@@ -10,13 +10,25 @@ def get_speakers(data_path: str) -> List[str]:
     return speakers_dirs
 
 
-def main():
-    RAW_CORPUS_PATH = os.path.join(os.getcwd(), '../../../Data/PolishData')
-    OUTPUT_PATH = os.path.join(os.getcwd(), '../../../Data/PolishData-stargan')
-    speakers = get_speakers(RAW_CORPUS_PATH)
-    print(speakers)
+def even_recs():
+    input_dataset_path = os.path.join(os.getcwd(), '../../../Data/PolishData-0-original')
+    output_path = os.path.join(os.getcwd(), '../../../Data/PolishData-1-even-recs')
+    speakers = get_speakers(input_dataset_path)
 
-    preprocess(RAW_CORPUS_PATH, OUTPUT_PATH, speakers)
+    preprocess(input_dataset_path, output_path, speakers, save_txt=False)
+
+
+def final_preprocess():
+    input_dataset_path = os.path.join(os.getcwd(), '../../../Data/PolishData-2-splitted/TRAIN')
+    output_path = os.path.join(os.getcwd(), '../../../Data/PolishData-STARGAN-TRAIN')
+    speakers = get_speakers(input_dataset_path)
+
+    preprocess(input_dataset_path, output_path, speakers, save_txt=True)
+
+
+def main():
+    # even_recs()
+    final_preprocess()
 
 
 if __name__ == '__main__':
