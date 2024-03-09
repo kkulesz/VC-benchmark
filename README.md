@@ -19,6 +19,12 @@ Other repositories used:
 # Quick note
 For both - me developing and for the future reader
 
+# Preparing dataset
+1. prepare dataset folder to include separate folder for each speaker inside
+2. run proper `StarGANv2-VC/preprocessing` script in order to make recordings 5s each
+3. run `scripts/datasets/test-train-split/split.py` to separate seen and unseen speakers and test/train
+4. preprocess `TRAIN` split for model you want to use 
+
 ## StarGANv2-VC
 ### start training
 Given you are in project root
