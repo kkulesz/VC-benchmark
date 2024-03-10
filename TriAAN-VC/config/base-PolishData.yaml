@@ -1,5 +1,5 @@
 data_path:     ../../Data/PolishData-TRIANN-TRAIN
-wav_path:      ../../Data/PolishData-2-splitted\TRAIN
+wav_path:      ../../Data/PolishData-2-splitted/TRAIN
 converted_path: 
 vocoder_path:    ./vocoder
 cpc_path:        ./cpc

@@ -1,5 +1,5 @@
 data_path:     ../../Data/DemoData-TRIANN-TRAIN
-wav_path:      ../../Data/DemoData-2-splitted\TRAIN
+wav_path:      ../../Data/DemoData-2-splitted/TRAIN
 converted_path: 
 vocoder_path:    ./vocoder
 cpc_path:        ./cpc

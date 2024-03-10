@@ -31,9 +31,7 @@ def main(cfg):
     for r in results:
         wav_path, mel, lf0, mel_len, speaker = r
         wav_path = os.path.normpath(wav_path)
-        print(wav_path)
         wn2info[wav_path] = [mel, lf0, mel_len, speaker]
-    print(len(wn2info))
     mean, std = ExtractMelstats(wn2info, train_wavs_names, cfg)  # only use train wav for normalizing stats
 
     print('---Write Features---')
