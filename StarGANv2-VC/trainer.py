@@ -240,6 +240,8 @@ class Trainer(object):
         eval_losses = defaultdict(list)
         eval_images = defaultdict(list)
         _ = [self.model[k].eval() for k in self.model]
+        g_loss_cumulative = 0
+        iters = 0
         # for eval_steps_per_epoch, batch in enumerate(tqdm(self.val_dataloader, desc="[eval]"), 1):
         for eval_steps_per_epoch, batch in enumerate(self.val_dataloader, 1):
 
@@ -256,6 +258,8 @@ class Trainer(object):
             # train the generator
             g_loss, g_losses_latent = compute_g_loss(
                 self.model, self.args.g_loss, x_real, y_org, y_trg, z_trgs=[z_trg, z_trg2], use_adv_cls=use_adv_cls)
+            g_loss_cumulative += g_loss  # modified: for saving best model
+            iters += 1                   # modified: for saving best model
             g_loss, g_losses_ref = compute_g_loss(
                 self.model, self.args.g_loss, x_real, y_org, y_trg, x_refs=[x_ref, x_ref2], use_adv_cls=use_adv_cls)
 
@@ -281,4 +285,4 @@ class Trainer(object):
 
         eval_losses = {key: np.mean(value) for key, value in eval_losses.items()}
         eval_losses.update(eval_images)
-        return eval_losses
+        return eval_losses, g_loss_cumulative/iters

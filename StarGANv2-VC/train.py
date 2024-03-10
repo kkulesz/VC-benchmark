@@ -127,6 +127,35 @@ def main(config_path):
         k_v_tuples = [(k, v) for k, v in results_dict.items()]
         return " | ".join(list(map(lambda k_v: '%-5s: %.4f' % (k_v[0], k_v[1]), k_v_tuples)))
 
+    def save_if_best(total_eval_loss: torch.Tensor, checkpoint_path: str, epoch: int) -> None:
+        best_model_path = os.path.join(checkpoint_path, 'best.pth')
+        best_result_path = os.path.join(checkpoint_path, 'best-result.txt')
+        best_epoch_path = os.path.join(checkpoint_path, 'best-epoch.txt')
+        total_eval_loss = total_eval_loss.item()
+
+        def save_value_to_file(file_path, value):
+            f = open(file_path, 'w')
+            f.write(str(value))
+            f.close()
+
+        if os.path.exists(best_result_path):
+            f = open(best_result_path)
+            best_so_far = float(f.read())
+            f.close()
+            if total_eval_loss < best_so_far:
+                print(f"NEW BEST RESULT={total_eval_loss}")
+                trainer.save_checkpoint(best_model_path)
+                save_value_to_file(best_result_path, total_eval_loss)
+                save_value_to_file(best_epoch_path, epoch)
+            else:
+                print(f"WORSE LOSS THAN PREVIOUSLY={total_eval_loss}")
+        else:
+            print(f"NO BEST MODEL SAVED SO FAR - saving with the result={total_eval_loss}")
+            trainer.save_checkpoint(best_model_path)
+            save_value_to_file(best_result_path, total_eval_loss)
+            save_value_to_file(best_epoch_path, epoch)
+
+
     for _ in range(1, epochs+1):
         epoch = trainer.epochs
 
@@ -135,13 +164,15 @@ def main(config_path):
         train_time = time.time() - start_train
 
         start_eval = time.time()
-        eval_results = trainer._eval_epoch()
+        eval_results, total_eval_loss = trainer._eval_epoch()
         eval_time = time.time() - start_eval
 
         logger.info(f'--- epoch {epoch} out of {epochs} ---')
         logger.info('train time: %f -- eval time: %f ' % (train_time, eval_time))
         logger.info(f"train: {get_log_results_str(train_results)}")
         logger.info(f"eval : {get_log_results_str(eval_results)}")
+
+        save_if_best(total_eval_loss, log_dir, epoch)
 
         if (epoch % save_freq) == 0:
             print("Saving...")
