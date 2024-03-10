@@ -51,5 +51,6 @@ def main(cfg):
 
 
 if __name__ == '__main__':
-    cfg = Config('./config/preprocess-DemoData.yaml')
+    # cfg = Config('./config/preprocess-DemoData.yaml')
+    cfg = Config('./config/preprocess-PolishData.yaml')
     main(cfg)

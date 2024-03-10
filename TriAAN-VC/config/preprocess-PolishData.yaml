@@ -1,5 +1,5 @@
-data_path:     ../../Data/PolishData
-output_path:   ../../Data/PolishData-triann
+data_path:     ../../Data/PolishData-2-splitted\TRAIN
+output_path:   ../../Data/PolishData-TRIANN-TRAIN
 cpc_path:      ./cpc
 sampling_rate: 16000
 top_db:        60

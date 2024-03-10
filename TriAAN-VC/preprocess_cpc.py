@@ -53,6 +53,7 @@ def main(cfg):
                                         
 
 if __name__ == '__main__':
-    
-    cfg = Config('./config/base-DemoData.yaml')
+    # cfg = Config('./config/base-DemoData.yaml')
+    cfg = Config('./config/base-PolishData.yaml')
+
     main(cfg)
