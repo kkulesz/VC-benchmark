@@ -1,7 +1,7 @@
-log_dir: "../../Models/stargan/PolishData"
+log_dir: "../../Models/stargan/PolishData-300epochs"
 save_freq: 50
 device: "cuda"
-epochs: 150     # default 150
+epochs: 300     # default 150
 batch_size: 10
 pretrained_model: ""
 load_only_params: false
