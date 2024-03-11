@@ -156,40 +156,46 @@ def convert(f0_model, starganv2, vocoder, source, targets, dir_to_save_samples):
     display(dir_to_save_samples, wave, f'original_{source_speaker_id}')
 
 
-def get_stargan_demodata_20_speakers_data():
+def get_stargan_demodata():
+    model_checkpoint = '../../Models\stargan\demodata/'
+    data_path = '../../Data\DemoData-2-splitted'
+
     return (
-        "../../Models/demodata/config.yml",
-        "../../Models/demodata/final_00200_epochs.pth",
+        os.path.join(model_checkpoint, 'config-DemoData.yml'),
+        os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
         "Utils/JDC/bst.t7",
         "Vocoder/checkpoint-400000steps.pkl",
-        ('p273', 'Demo/VCTK-corpus/p273/p273_023.wav'),
+        ('p226', os.path.join(data_path, 'TRAIN/p226/1.wav')),
         [
-            ('p230', 'Demo/VCTK-corpus/p230/p230_023.wav'),
-            ('p236', 'Demo/VCTK-corpus/p236/p236_023.wav'),
-            ('p259', 'Demo/VCTK-corpus/p259/p259_023.wav')
+            ('p233', os.path.join(data_path, 'TEST\SEEN\p233/5.wav')),
+            ('p244', os.path.join(data_path, 'TEST\SEEN\p244/6.wav')),
+            ('p256', os.path.join(data_path, 'TEST\SEEN\p256/29.wav'))
         ],
-        "../../samples/stargan_demodata_20_speakers"
+        "../../samples/stargan_demodata"
     )
 
-def get_stargan_polishdata_5_speakers_data():
+def get_stargan_polishdata():
+    model_checkpoint = '../../Models\stargan\polishdata'
+    data_path = '../../Data\PolishData-2-splitted'
+
     return (
-        "../../Models/\polishdata/config.yml",
-        "../../Models/\polishdata/final_00300_epochs.pth",
+        os.path.join(model_checkpoint, 'config-PolishData.yml'),
+        os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
         "Utils/JDC/bst.t7",
         "Vocoder/checkpoint-400000steps.pkl",
-        ('fair-mls-20', '../../Data/PolishData-stargan/fair-mls-20/1.wav'),
+        ('p226', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
         [
-            ('mailabs-19', '../../Data/PolishData-stargan/mailabs-19/1.wav'),
-            ('pwr-azon-read-20', '../../Data/PolishData-stargan/pwr-azon-read-20/1.wav'),
-            ('pwr-maleset-unk', '../../Data/PolishData-stargan/pwr-maleset-unk/1.wav')
+            ('clarin-pjatk-mobile-15~0001', os.path.join(data_path, 'TEST\SEEN\clarin-pjatk-mobile-15~0001/23.wav')),
+            ('mailabs-19~0001', os.path.join(data_path, 'TEST\SEEN\mailabs-19~0001/14.wav')),
+            ('pwr-azon-read-20~228', os.path.join(data_path, 'TEST\SEEN\pwr-azon-read-20~228/73.wav'))
         ],
-        "../../samples/stargan_polishdata_5_speakers"
+        "../../samples/stargan_polishdata-150epochs"
     )
 
 
 def main():
-    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_demodata_20_speakers_data()
-    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata_5_speakers_data()
+    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_demodata()
+    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata()
 
 
     f0_model = load_f0_model(f0_model_path)
