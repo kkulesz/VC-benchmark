@@ -183,7 +183,7 @@ def get_stargan_polishdata():
         os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
         "Utils/JDC/bst.t7",
         "Vocoder/checkpoint-400000steps.pkl",
-        ('p226', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
+        ('clarin-pjatk-studio-15~0002', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
         [
             ('clarin-pjatk-mobile-15~0001', os.path.join(data_path, 'TEST\SEEN\clarin-pjatk-mobile-15~0001/23.wav')),
             ('mailabs-19~0001', os.path.join(data_path, 'TEST\SEEN\mailabs-19~0001/14.wav')),
@@ -192,10 +192,29 @@ def get_stargan_polishdata():
         "../../samples/stargan_polishdata-150epochs"
     )
 
+def get_stargan_polishdata_300epochs():
+    model_checkpoint = '../../Models\stargan\polishdata-300epochs'
+    data_path = '../../Data\PolishData-2-splitted'
+
+    return (
+        os.path.join(model_checkpoint, 'config-PolishData.yml'),
+        os.path.join(model_checkpoint, 'final_00300_epochs.pth'),
+        "Utils/JDC/bst.t7",
+        "Vocoder/checkpoint-400000steps.pkl",
+        ('clarin-pjatk-studio-15~0002', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
+        [
+            ('clarin-pjatk-mobile-15~0001', os.path.join(data_path, 'TEST\SEEN\clarin-pjatk-mobile-15~0001/23.wav')),
+            ('mailabs-19~0001', os.path.join(data_path, 'TEST\SEEN\mailabs-19~0001/14.wav')),
+            ('pwr-azon-read-20~228', os.path.join(data_path, 'TEST\SEEN\pwr-azon-read-20~228/73.wav'))
+        ],
+        "../../samples/stargan_polishdata-300epochs"
+    )
+
 
 def main():
     # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_demodata()
-    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata()
+    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata()
+    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata_300epochs()
 
 
     f0_model = load_f0_model(f0_model_path)
