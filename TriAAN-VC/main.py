@@ -59,8 +59,8 @@ def get_polishdata():
 
 
 if __name__ == "__main__":
-    cfg, save_dir = get_demodata()
-    # cfg, save_dir = get_polishdata()
+    # cfg, save_dir = get_demodata()
+    cfg, save_dir = get_polishdata()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, default='train', help='Action') # train / test
