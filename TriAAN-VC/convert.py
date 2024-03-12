@@ -143,22 +143,25 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
             os.remove(f'{converted_target_dir_path}/feats.1.scp')
             os.remove(f'{converted_target_dir_path}/feats.1.ark')
 
-def get_stargan_demodata_20_speakers_data():
+def get_stargan_demodata():
+    model_checkpoint = '../../Models/triann/demodata/'
+    data_path = '../../Data/DemoData-2-splitted'
+
     return (
-        "../../Models/triann/demodata/base-DemoData.yaml",
-        "../../Models/triann/demodata/model-best.pth",
-        "../../Models/triann/demodata/mel_stats.npy",
-        ('p273', '../../Data/DemoData/p273/1.wav'),
+        os.path.join(model_checkpoint, 'base-DemoData.yaml'),
+        os.path.join(model_checkpoint, 'model-best.pth'),  # model-500.pth
+        os.path.join(model_checkpoint, 'mel_stats.npy'),
+        ('p226', os.path.join(data_path, 'TRAIN/p226/1.wav')),
         [
-            ('p230', '../../Data/DemoData/p230/1.wav'),
-            ('p236', '../../Data/DemoData/p236/1.wav'),
-            ('p259', '../../Data/DemoData/p259/1.wav')
+            ('p233', os.path.join(data_path, 'TEST\SEEN\p233/5.wav')),
+            ('p244', os.path.join(data_path, 'TEST\SEEN\p244/6.wav')),
+            ('p256', os.path.join(data_path, 'TEST\SEEN\p256/29.wav'))
         ],
-        "../../samples/triann_demodata_20_speakers"
+        "../../samples/triann_demodata"
     )
 
 if __name__ == "__main__":
-    cfg, model, mel_stats_path, source, targets, save_dir = get_stargan_demodata_20_speakers_data()
+    cfg, model, mel_stats_path, source, targets, save_dir = get_stargan_demodata()
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
