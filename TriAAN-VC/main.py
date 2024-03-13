@@ -13,14 +13,22 @@ warnings.filterwarnings('ignore')
 import json
 import yaml
 import argparse
+import time
 
 from src.train import *
 from src.dataset import *
 from src.utils import *
 from config import *
 
-def main(cfg):
-    
+
+def save_execution_time(log_dir, total_time):
+    file_path = os.path.join(log_dir, 'execution_time.txt')
+    f = open(file_path, 'w')
+    f.write(str(total_time))
+    f.close()
+
+
+def main(cfg, save_dir):
     seed_init(seed=cfg.seed)
     if args.action == 'train':
         
@@ -34,7 +42,11 @@ def main(cfg):
         data_loader   = {'train':train_loader, 'valid':val_loader}
         
         trainer = Trainer(data_loader, cfg)
+
+        start_training_time = time.time()
         trainer.train()
+        total_training_time = time.time() - start_training_time
+        save_execution_time(save_dir, total_training_time)
         
         # print('--- Test Phase ---')
         # seed_init(seed=cfg.seed)
@@ -50,6 +62,10 @@ def main(cfg):
         tester.test(set_type='test')
 
 
+def get_test_data():
+    return './config/base-TEST.yaml', '../../Models/triann/test'
+
+
 def get_demodata():
     return './config/base-DemoData.yaml', '../../Models/triann/demodata'
 
@@ -59,8 +75,9 @@ def get_polishdata():
 
 
 if __name__ == "__main__":
+    cfg, save_dir = get_test_data()
     # cfg, save_dir = get_demodata()
-    cfg, save_dir = get_polishdata()
+    # cfg, save_dir = get_polishdata()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, default='train', help='Action') # train / test
@@ -78,4 +95,4 @@ if __name__ == "__main__":
     cfg  = Config(args.config)
     cfg  = set_experiment(args, cfg) # merge arg and cfg, make directories
     print(cfg)
-    main(cfg)
+    main(cfg, save_dir)

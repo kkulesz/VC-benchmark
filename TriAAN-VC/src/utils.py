@@ -31,10 +31,10 @@ def set_experiment(args, cfg):
     cfg.ex_name        = os.path.basename(os.getcwd())
     cfg.converted_path = opj(cfg.checkpoint, f'converted_{cfg.n_uttr}_uttr')
     MakeDir(cfg.checkpoint)
-    MakeDir(cfg.converted_path)
+    # MakeDir(cfg.converted_path)
         
     return cfg
-           
+
 def get_params(args):
     
     params    = {}

@@ -44,6 +44,8 @@ def main(config_path):
     print(f"epochs: {config['epochs']}")
     print(f"train_data: {config['train_data']}")
     print(f"pretrained_model: {config['pretrained_model']}")
+    print(f"log_dir: {config['log_dir']}")
+
     log_dir = config['log_dir']
     if not osp.exists(log_dir): os.makedirs(log_dir, exist_ok=True)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
@@ -155,7 +157,13 @@ def main(config_path):
             save_value_to_file(best_result_path, total_eval_loss)
             save_value_to_file(best_epoch_path, epoch)
 
+    def save_execution_time(log_dir, total_time):
+        file_path = os.path.join(log_dir, 'execution_time.txt')
+        f = open(file_path, 'w')
+        f.write(str(total_time))
+        f.close()
 
+    start_training_time = time.time()
     for _ in range(1, epochs+1):
         epoch = trainer.epochs
 
@@ -178,6 +186,10 @@ def main(config_path):
             print("Saving...")
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
     trainer.save_checkpoint(osp.join(log_dir, 'final_%05d_epochs.pth' % epochs))
+
+    total_training_time = time.time() - start_training_time
+    save_execution_time(log_dir, total_training_time)
+
     return 0
 
 
@@ -191,11 +203,4 @@ def get_data_path_list(train_path, val_path):
 
 
 if __name__ == "__main__":
-    # import os
-    # torch.backends.cudnn.benchmark = True
-    # torch.cuda.set_per_process_memory_fraction(1.0)
-    # torch.cuda.empty_cache()
-    # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:21"
-    start = time.time()
     main()
-    print(f"Elapse time: {time.time() - start}")
