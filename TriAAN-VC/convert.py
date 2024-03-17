@@ -83,6 +83,7 @@ def GetTestData(path, cfg):
     
     return wav, mel, lf0
 
+
 def main(cfg, mel_stats_path, source, targets, save_dir):
     seed_init(seed=cfg.seed)
     
@@ -97,16 +98,15 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
     with torch.no_grad():
-        source_speaker_id, source_path = source
-        src_wav_np, src_mel, src_lf0_np = GetTestData(source_path, cfg.setting)
+        src_wav_np, src_mel, src_lf0_np = GetTestData(source, cfg.setting)
         feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=save_dir + '/feats.1'))
         feat_writer[os.path.join(save_dir, "source")] = src_mel
         feat_writer.close()
         decode(f'{save_dir}/feats.1.scp', save_dir, cfg.device)
         os.remove(f'{save_dir}/feats.1.scp')
         os.remove(f'{save_dir}/feats.1.ark')
-        for target_speaker_id, target_path in targets:
-            trg_wav_np, trg_mel, _ = GetTestData(target_path, cfg.setting)
+        for org_path, cnv_path in targets:
+            trg_wav_np, trg_mel, _ = GetTestData(org_path, cfg.setting)
             if cfg.train.cpc:
                 cpc_model = load_cpc(f'{cfg.cpc_path}/cpc.pt').to(cfg.device)
                 cpc_model.eval()
@@ -122,47 +122,67 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
                 trg_feat = torch.from_numpy(trg_feat).unsqueeze(0).to(cfg.device)
             src_lf0 = torch.from_numpy(normalize_lf0(src_lf0_np)).unsqueeze(0).to(cfg.device)
 
-            converted_target_dir_path = os.path.join(save_dir, target_speaker_id)
-            os.makedirs(converted_target_dir_path)
-            cnv_name = f'from_{source_speaker_id}_to_{target_speaker_id}'
-            converted_target_file_path = os.path.join(converted_target_dir_path, cnv_name)
-
             output = model(src_feat, src_lf0, trg_feat)
             output = output.squeeze(0).cpu().numpy().T * (std.squeeze(1) + 1e-8) + mean.squeeze(1)
-            output_list.append([converted_target_file_path, output, trg_mel])
+            output_list.append([cnv_path, output, trg_mel])
 
             # Mel-spectrograms to Wavs
-            feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=converted_target_dir_path+'/feats.1'))
+            cnv_path_dir = os.path.dirname(cnv_path)
+            print(cnv_path)
+            print(cnv_path_dir)
+            feat_writer = kaldiio.WriteHelper("ark,scp:{o}.ark,{o}.scp".format(o=cnv_path_dir+'/feats.1'))
             for (filename, output, trg_mel) in output_list:
                 feat_writer[filename + '_cnv'] = output
                 feat_writer[filename + '_trg'] = trg_mel
 
             feat_writer.close()
             print('synthesize waveform...')
-            decode(f'{converted_target_dir_path}/feats.1.scp', save_dir, cfg.device)
-            os.remove(f'{converted_target_dir_path}/feats.1.scp')
-            os.remove(f'{converted_target_dir_path}/feats.1.ark')
+            decode(f'{cnv_path_dir}/feats.1.scp', save_dir, cfg.device)
+            os.remove(f'{cnv_path_dir}/feats.1.scp')
+            os.remove(f'{cnv_path_dir}/feats.1.ark')
+
+
+def convert_whole_folder(
+        cfg,
+        stats_path: str,
+        data_path: str,
+        save_dir_root: str,
+        src_speaker_path: str
+):
+    # (original_file_path, converted_file_path)
+    targets = []
+    for walk_root, dirs, files in os.walk(data_path):
+        walk_root = os.path.normpath(walk_root)
+        for d in dirs:
+            relative_dir_path = walk_root[len(data_path):]
+            dir_to_create = os.path.normpath(save_dir_root + relative_dir_path + '/' + d)
+            os.makedirs(dir_to_create, exist_ok=True)
+        if len(files) > 0:
+            relative_dir_path = walk_root[len(data_path):]
+            dir_to_save_converted_recs = save_dir_root + relative_dir_path
+            for f in files:
+                org_path = os.path.normpath(os.path.join(walk_root, f))
+                cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
+                targets.append((org_path, cnv_path))
+    main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=targets, save_dir=save_dir_root)
+    # TODO: rename files
+
 
 def get_stargan_demodata():
     model_checkpoint = '../../Models/triann/demodata/'
-    data_path = '../../Data/DemoData-2-splitted'
 
     return (
         os.path.join(model_checkpoint, 'base-DemoData.yaml'),
         os.path.join(model_checkpoint, 'model-best.pth'),  # model-500.pth
         os.path.join(model_checkpoint, 'mel_stats.npy'),
-        ('p226', os.path.join(data_path, 'TRAIN/p226/1.wav')),
-        [
-            ('p233', os.path.join(data_path, 'TEST\SEEN\p233/5.wav')),
-            ('p244', os.path.join(data_path, 'TEST\SEEN\p244/6.wav')),
-            ('p256', os.path.join(data_path, 'TEST\SEEN\p256/29.wav'))
-        ],
-        "../../samples/triann_demodata"
+        os.path.join('../../Data/DemoData-2-splitted/', 'TRAIN/p226/1.wav'),
+        "../../samples/TEST",
+        '../../Data/DemoData-2-splitted/TEST/SEEN/p226'
     )
 
+
 if __name__ == "__main__":
-    cfg, model, mel_stats_path, source, targets, save_dir = get_stargan_demodata()
-    
+    cfg, model, mel_stats_path, src_path, save_dir, data_path = get_stargan_demodata()
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
@@ -177,6 +197,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cfg  = Config(args.config)
     cfg  = set_experiment(args, cfg)
-    print(cfg)
-   
-    main(cfg, mel_stats_path, source, targets, save_dir)
+    # print(cfg)
+
+    convert_whole_folder(
+        cfg=cfg,
+        stats_path=mel_stats_path,
+        data_path=data_path,
+        save_dir_root=save_dir,
+        src_speaker_path=src_path)
