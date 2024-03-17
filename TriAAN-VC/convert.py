@@ -142,6 +142,20 @@ def main(cfg, mel_stats_path, source, targets, save_dir):
             os.remove(f'{cnv_path_dir}/feats.1.ark')
 
 
+def rename_converted_files(data_path):
+    for walk_root, dirs, files in os.walk(data_path):
+        cnv_files = list(filter(lambda f: f.endswith('cnv_gen.wav'), files))
+        for f in cnv_files:
+            from_ = os.path.join(walk_root, f)
+            to_ = os.path.join(walk_root, f[:-len('_cnv_gen.wav')])
+            os.rename(from_, to_)
+
+        trg_files = list(filter(lambda f: f.endswith('trg_gen.wav'), files))
+        for f in trg_files:
+            from_ = os.path.join(walk_root, f)
+            to_ = os.path.join(walk_root, f[:-len('.wav_trg_gen.wav')] + '_org.wav')
+            os.rename(from_, to_)
+
 def convert_whole_folder(
         cfg,
         stats_path: str,
@@ -164,8 +178,8 @@ def convert_whole_folder(
                 org_path = os.path.normpath(os.path.join(walk_root, f))
                 cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
                 targets.append((org_path, cnv_path))
-    main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=targets, save_dir=save_dir_root)
-    # TODO: rename files
+    # main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=targets, save_dir=save_dir_root)
+    rename_converted_files(save_dir_root)
 
 
 def get_stargan_demodata():
