@@ -102,7 +102,16 @@ def load_f0_model(fo_model_path: str):
     return f0_model
 
 
-def convert(f0_model, starganv2, vocoder, source_wav_path, targets, root_dir_to_save_samples, spk_id_label_mapping):
+def convert(
+        f0_model,
+        starganv2,
+        vocoder,
+        source_wav_path,
+        targets,
+        root_dir_to_save_samples,
+        spk_id_label_mapping,
+        generate_debug_recs
+):
     source_audio, _ = librosa.load(source_wav_path, sr=24000)
     source_audio = source_audio / np.max(np.abs(source_audio))
     source_audio.dtype = np.float32
@@ -144,17 +153,19 @@ def convert(f0_model, starganv2, vocoder, source_wav_path, targets, root_dir_to_
         cnv_path_filename = os.path.basename(cnv_path)
 
         display(cnv_path_dir, wave, cnv_path_filename)
-        display(cnv_path_dir, reconstructed_samples[target_speaker_id], f'rec_{cnv_path_filename}')
+        if generate_debug_recs:
+            display(cnv_path_dir, reconstructed_samples[target_speaker_id], f'rec_{cnv_path_filename}')
 
-    wave, sr = librosa.load(source_wav_path, sr=24000)
-    mel = __preprocess(wave)
-    c = mel.transpose(-1, -2).squeeze().to(device)
-    with torch.no_grad():
-        recon = vocoder.inference(c)
-        recon = recon.view(-1).cpu().numpy()
+    if generate_debug_recs:
+        wave, sr = librosa.load(source_wav_path, sr=24000)
+        mel = __preprocess(wave)
+        c = mel.transpose(-1, -2).squeeze().to(device)
+        with torch.no_grad():
+            recon = vocoder.inference(c)
+            recon = recon.view(-1).cpu().numpy()
 
-    display(root_dir_to_save_samples, recon, f'reconstructed_source_by_vocoder.wav')
-    display(root_dir_to_save_samples, wave, f'original.wav')
+        display(root_dir_to_save_samples, recon, f'reconstructed_source_by_vocoder.wav')
+        display(root_dir_to_save_samples, wave, f'original.wav')
 
 
 def get_stargan_demodata():
@@ -202,7 +213,8 @@ def convert_whole_folder(
                 cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
                 targets.append((f"{speaker_id}===={f}", org_path, cnv_path))
 
-    convert(f0_model, stargan, vocoder, source_path, targets, save_dir_root, speaker_label_mapping)
+    convert(f0_model, stargan, vocoder, source_path, targets, save_dir_root, speaker_label_mapping,
+            generate_debug_info=False)
 
 
 def main():
