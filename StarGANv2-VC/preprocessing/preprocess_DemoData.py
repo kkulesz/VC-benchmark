@@ -20,7 +20,7 @@ def even_recs():
 
 def final_preprocess():
     input_dataset_path = os.path.join(os.getcwd(), '../../../Data/DemoData-2-splitted/TRAIN')
-    output_path = os.path.join(os.getcwd(), '../../../Data/DemoData-STARGAN-TRAIN-test')
+    output_path = os.path.join(os.getcwd(), '../../../Data/DemoData-STARGAN-TRAIN')
     speakers = get_speakers(input_dataset_path)
 
     preprocess(input_dataset_path, output_path, speakers, save_txt=True)
