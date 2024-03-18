@@ -43,13 +43,13 @@ def __build_model(model_params):
 
 def __compute_style(starganv2, speaker_dicts):
     reference_embeddings = {}
-    for speaker_id, (path, speaker_idx) in speaker_dicts.items():
-        if path == "":
+    for speaker_id, (src_path, speaker_idx, cnv_path) in speaker_dicts.items():
+        if speaker_idx is None:
             label = torch.LongTensor([speaker_idx]).to(device)
             latent_dim = starganv2.mapping_network.shared[0].in_features
             ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
         else:
-            wave, sr = librosa.load(path, sr=24000)
+            wave, sr = librosa.load(src_path, sr=24000)
             audio, index = librosa.effects.trim(wave, top_db=30)
             if sr != 24000:
                 wave = librosa.resample(wave, sr, 24000)
@@ -58,7 +58,7 @@ def __compute_style(starganv2, speaker_dicts):
             with torch.no_grad():
                 label = torch.LongTensor([speaker_idx])
                 ref = starganv2.style_encoder(mel_tensor.unsqueeze(1), label)
-        reference_embeddings[speaker_id] = (ref, label)
+        reference_embeddings[speaker_id] = (ref, label, cnv_path)
 
     return reference_embeddings
 
@@ -67,8 +67,7 @@ def display(dir_to_save_samples, wave, filename):
     from scipy.io.wavfile import write
     import os
     os.makedirs(dir_to_save_samples, exist_ok=True)
-    print(filename)
-    write(os.path.join(dir_to_save_samples, f"{filename}.wav"), 24000, wave)
+    write(os.path.join(dir_to_save_samples, filename), 24000, wave)
 
 
 def load_vocoder(vocoder_path: str):
@@ -103,23 +102,23 @@ def load_f0_model(fo_model_path: str):
     return f0_model
 
 
-def convert(f0_model, starganv2, vocoder, source, targets, dir_to_save_samples):
-    source_speaker_id, source_wav_path = source
+def convert(f0_model, starganv2, vocoder, source_wav_path, targets, root_dir_to_save_samples, spk_id_label_mapping):
     source_audio, _ = librosa.load(source_wav_path, sr=24000)
     source_audio = source_audio / np.max(np.abs(source_audio))
     source_audio.dtype = np.float32
 
-    target_speakers_dict = {}  # speaker_id -> (path_to_speaker_wav_file, speaker_index)
-    for idx, (spk, pth) in enumerate(targets):
-        target_speakers_dict[spk] = (pth, idx)
-    # speaker_id -> (speaker_embedding, speaker_index)
+    target_speakers_dict = {}
+    for _, (spk_id_plus_rec, src_pth, cnv_path) in enumerate(targets):
+        spk_id = spk_id_plus_rec.split('====')[0]
+        label_idx = spk_id_label_mapping[spk_id]
+        target_speakers_dict[spk_id_plus_rec] = (src_pth, label_idx, cnv_path)
     targets_reference_embeddings = __compute_style(starganv2, target_speakers_dict)
     start = time.time()
 
     source_audio = __preprocess(source_audio).to(device)
     converted_samples = {}
     reconstructed_samples = {}
-    for key, (ref, _) in targets_reference_embeddings.items():
+    for key, (ref, _, cnv_path) in targets_reference_embeddings.items():
         with torch.no_grad():
             f0_feat = f0_model.get_feature_GAN(source_audio.unsqueeze(1))
             stargan_out = starganv2.generator(source_audio.unsqueeze(1), ref, F0=f0_feat)
@@ -134,16 +133,18 @@ def convert(f0_model, starganv2, vocoder, source, targets, dir_to_save_samples):
             recon = vocoder.inference(raw_target_mel_reshaped)
             recon = recon.view(-1).cpu().numpy()
 
-        converted_samples[key] = y_out.numpy()
+        converted_samples[key] = (y_out.numpy(), cnv_path)
         reconstructed_samples[key] = recon
 
     end = time.time()
     print('total processing time: %.3f sec\n\n' % (end - start))
 
-    for target_speaker_id, wave in converted_samples.items():
-        target_speaker_dir = os.path.join(dir_to_save_samples, target_speaker_id)
-        display(target_speaker_dir, wave, f"converted_{source_speaker_id}_to_{target_speaker_id}")
-        display(target_speaker_dir, reconstructed_samples[target_speaker_id], f'reconstructed_only')
+    for target_speaker_id, (wave, cnv_path) in converted_samples.items():
+        cnv_path_dir = os.path.dirname(cnv_path)
+        cnv_path_filename = os.path.basename(cnv_path)
+
+        display(cnv_path_dir, wave, cnv_path_filename)
+        display(cnv_path_dir, reconstructed_samples[target_speaker_id], f'rec_{cnv_path_filename}')
 
     wave, sr = librosa.load(source_wav_path, sr=24000)
     mel = __preprocess(wave)
@@ -152,75 +153,70 @@ def convert(f0_model, starganv2, vocoder, source, targets, dir_to_save_samples):
         recon = vocoder.inference(c)
         recon = recon.view(-1).cpu().numpy()
 
-    display(dir_to_save_samples, recon, f'reconstructed_source_{source_speaker_id}_by_vocoder')
-    display(dir_to_save_samples, wave, f'original_{source_speaker_id}')
+    display(root_dir_to_save_samples, recon, f'reconstructed_source_by_vocoder.wav')
+    display(root_dir_to_save_samples, wave, f'original.wav')
 
 
 def get_stargan_demodata():
-    model_checkpoint = '../../Models\stargan\demodata/'
-    data_path = '../../Data\DemoData-2-splitted'
+    model_checkpoint = '../../Models/stargan/demodata/'
+    data_path = '../../Data/DemoData-2-splitted'
+    speaker_label_mapping = {
+        'p226': 10, 'p243': 14, 'p259': 7, 'p256': 11, 'p240': 9, 'p258': 13, 'p230': 12, 'p270': 8, 'p236': 5,
+        'p231': 0, 'p229': 6, 'p233': 1, 'p232': 4, 'p227': 2, 'p244': 3}
 
     return (
         os.path.join(model_checkpoint, 'config-DemoData.yml'),
         os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
         "Utils/JDC/bst.t7",
         "Vocoder/checkpoint-400000steps.pkl",
-        ('p226', os.path.join(data_path, 'TRAIN/p226/1.wav')),
-        [
-            ('p233', os.path.join(data_path, 'TEST\SEEN\p233/5.wav')),
-            ('p244', os.path.join(data_path, 'TEST\SEEN\p244/6.wav')),
-            ('p256', os.path.join(data_path, 'TEST\SEEN\p256/29.wav'))
-        ],
-        "../../samples/stargan_demodata"
+        os.path.join(data_path, 'TRAIN/p226/1.wav'),
+        '../../Data/DemoData-2-splitted/TEST/SEEN',
+        '../../samples/TEST-STARGAN',
+        speaker_label_mapping
     )
 
-def get_stargan_polishdata():
-    model_checkpoint = '../../Models\stargan\polishdata'
-    data_path = '../../Data\PolishData-2-splitted'
 
-    return (
-        os.path.join(model_checkpoint, 'config-PolishData.yml'),
-        os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
-        "Utils/JDC/bst.t7",
-        "Vocoder/checkpoint-400000steps.pkl",
-        ('clarin-pjatk-studio-15~0002', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
-        [
-            ('clarin-pjatk-mobile-15~0001', os.path.join(data_path, 'TEST\SEEN\clarin-pjatk-mobile-15~0001/23.wav')),
-            ('mailabs-19~0001', os.path.join(data_path, 'TEST\SEEN\mailabs-19~0001/14.wav')),
-            ('pwr-azon-read-20~228', os.path.join(data_path, 'TEST\SEEN\pwr-azon-read-20~228/73.wav'))
-        ],
-        "../../samples/stargan_polishdata-150epochs"
-    )
+def convert_whole_folder(
+    f0_model,
+    stargan,
+    vocoder,
+    data_path: str,
+    save_dir_root: str,
+    source_path: str,
+    speaker_label_mapping
+):
+    os.makedirs(save_dir_root, exist_ok=True)
+    targets = []
+    for walk_root, dirs, files in os.walk(data_path):
+        walk_root = os.path.normpath(walk_root)
+        for d in dirs:
+            relative_dir_path = walk_root[len(data_path):]
+            dir_to_create = os.path.normpath(save_dir_root + relative_dir_path + '/' + d)
+            os.makedirs(dir_to_create, exist_ok=True)
+        if len(files) > 0:
+            speaker_id = walk_root[len(os.path.dirname(walk_root)) + 1:]
+            relative_dir_path = walk_root[len(data_path):]
+            dir_to_save_converted_recs = save_dir_root + relative_dir_path
+            for f in files:
+                org_path = os.path.normpath(os.path.join(walk_root, f))
+                cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
+                targets.append((f"{speaker_id}===={f}", org_path, cnv_path))
 
-def get_stargan_polishdata_300epochs():
-    model_checkpoint = '../../Models\stargan\polishdata-300epochs'
-    data_path = '../../Data\PolishData-2-splitted'
-
-    return (
-        os.path.join(model_checkpoint, 'config-PolishData.yml'),
-        os.path.join(model_checkpoint, 'final_00300_epochs.pth'),
-        "Utils/JDC/bst.t7",
-        "Vocoder/checkpoint-400000steps.pkl",
-        ('clarin-pjatk-studio-15~0002', os.path.join(data_path, 'TRAIN/clarin-pjatk-studio-15~0002/1.wav')),
-        [
-            ('clarin-pjatk-mobile-15~0001', os.path.join(data_path, 'TEST\SEEN\clarin-pjatk-mobile-15~0001/23.wav')),
-            ('mailabs-19~0001', os.path.join(data_path, 'TEST\SEEN\mailabs-19~0001/14.wav')),
-            ('pwr-azon-read-20~228', os.path.join(data_path, 'TEST\SEEN\pwr-azon-read-20~228/73.wav'))
-        ],
-        "../../samples/stargan_polishdata-300epochs"
-    )
+    convert(f0_model, stargan, vocoder, source_path, targets, save_dir_root, speaker_label_mapping)
 
 
 def main():
-    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_demodata()
-    # cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata()
-    cfg_path, stargan_path, f0_model_path, vocoder_path, source, targets, dir_to_save_samples = get_stargan_polishdata_300epochs()
-
+    cfg_path, stargan_path, f0_model_path, vocoder_path, source_path, dir_of_recs_to_be_converted, root_dir_to_save_samples, speaker_label_mapping = get_stargan_demodata()
 
     f0_model = load_f0_model(f0_model_path)
     stargan = load_stargan(stargan_path, cfg_path)
     vocoder = load_vocoder(vocoder_path)
-    convert(f0_model, stargan, vocoder, source, targets, dir_to_save_samples)
+
+    convert_whole_folder(
+        f0_model=f0_model, stargan=stargan, vocoder=vocoder,
+        data_path=dir_of_recs_to_be_converted, save_dir_root=root_dir_to_save_samples, source_path=source_path,
+        speaker_label_mapping=speaker_label_mapping
+    )
 
 
 if __name__ == '__main__':

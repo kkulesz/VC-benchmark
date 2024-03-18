@@ -73,11 +73,20 @@ def __get_df(output_dir, speakers):
 
 def __save_in_proper_form(df, output_path, file_name):
     file_str = ""
+    speaker_mapping = {}
     for index, k in df.iterrows():
         file_str += k['Path'] + "|" + str(k['Speaker'] - 1) + '\n'
+
+        speaker_id = os.path.basename(os.path.dirname(os.path.normpath(k['Path'])))
+        speaker_mapping[speaker_id] = k['Speaker'] - 1
+
     text_file = open(os.path.join(output_path, file_name), "w")
     text_file.write(file_str)
     text_file.close()
+
+    spk_mapping_file = open(os.path.join(output_path, 'speaker_mapping.txt'), "w")
+    spk_mapping_file.write(str(speaker_mapping))
+    spk_mapping_file.close()
 
 
 def __shuffle_split_and_save_txts(output_path, df, save_txt: bool):
