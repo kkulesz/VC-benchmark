@@ -163,6 +163,7 @@ def convert_whole_folder(
         save_dir_root: str,
         src_speaker_path: str
 ):
+    os.makedirs(save_dir_root, exist_ok=True)
     # (original_file_path, converted_file_path)
     targets = []
     for walk_root, dirs, files in os.walk(data_path):
