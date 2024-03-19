@@ -95,7 +95,7 @@ def split(dataset_path: str, unseen_spks: List[str], train_ratio_prc: int, save_
 def get_demodata_info():
     dataset_path = "../../../../Data/DemoData-1-even-recs"
     unseen_speakers = ['p225', 'p239', 'p228', 'p273', 'p254']
-    speaker_train_ratio_perc = 95
+    speaker_train_ratio_perc = 98
 
     save_dir = "../../../../Data/DemoData-2-splitted"
 
@@ -105,7 +105,7 @@ def get_demodata_info():
 def get_polishdata_info():
     dataset_path = "../../../../Data/PolishData-1-even-recs"
     unseen_speakers = ['clarin-pjatk-mobile-15~0003', 'clarin-pjatk-mobile-15~0004', 'clarin-pjatk-studio-15~0001', 'pwr-azon-spont-20~99317', 'fair-mls-20~8758']
-    speaker_train_ratio_perc = 95
+    speaker_train_ratio_perc = 98
 
     save_dir = "../../../../Data/PolishData-2-splitted"
 

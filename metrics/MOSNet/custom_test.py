@@ -112,6 +112,7 @@ def main(directory):
         outfile.write("\nAverage: {}\n".format(average))
 
 if __name__ == '__main__':
-    # directory = "../../../samples/triann_demodata_20_speakers/p230"
-    directory = "../../../samples/stargan_polishdata_5_speakers/mailabs-19"
+    # directory = "../../../samples/TEST-STARGAN"
+    directory = "../../../samples/TEST-TRIANN"
+
     main(directory)
