@@ -2,11 +2,13 @@ from metrics.mcd_own_implementation.mcd import calculate_mcd
 
 
 def main():
-    f1 = "../FreeVC/demo_data/p225/p225_001.wav"
-    f2 = "../FreeVC/demo_data/p226/p226_002.wav"
+    converted = "../../samples/TEST-TRIANN/p270/34.wav"
+    trg_spk = "../../samples/TEST-TRIANN/p270/rec_34.wav"
+    src_spk = "../../samples/TEST-TRIANN/source_gen.wav"
 
-    print(f"Between the same file {calculate_mcd(f1, f1)}")
-    print(f"Between different files {calculate_mcd(f1, f2)}")
+    print(f"Between the same file: {calculate_mcd(converted, converted)}")
+    print(f"Between trg speaker and converted: {calculate_mcd(trg_spk, converted)}")
+    print(f"Between src speaker and converted: {calculate_mcd(src_spk, converted)}")
 
 
 if __name__ == '__main__':

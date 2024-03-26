@@ -45,13 +45,13 @@ def __compute_style(starganv2, speaker_dicts):
     reference_embeddings = {}
     for speaker_id, (src_path, speaker_idx, cnv_path) in speaker_dicts.items():
         if speaker_idx is None:
-            print("unseen")
+            # print("unseen")
             speaker_idx = random.randint(0, len(speaker_dicts))
             label = torch.LongTensor([speaker_idx]).to(device)
             latent_dim = starganv2.mapping_network.shared[0].in_features
             ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
         else:
-            print("seen")
+            # print("seen")
             wave, sr = librosa.load(src_path, sr=24000)
             audio, index = librosa.effects.trim(wave, top_db=30)
             if sr != 24000:
@@ -217,7 +217,7 @@ def convert_whole_folder(
                 targets.append((f"{speaker_id}===={f}", org_path, cnv_path))
 
     convert(f0_model, stargan, vocoder, source_path, targets, save_dir_root, speaker_label_mapping,
-            generate_debug_info=False)
+            generate_debug_recs=True)
 
 
 def main():

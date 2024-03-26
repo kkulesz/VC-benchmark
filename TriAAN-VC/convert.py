@@ -154,7 +154,7 @@ def rename_converted_files(data_path):
         trg_files = list(filter(lambda f: f.endswith('trg_gen.wav'), files))
         for f in trg_files:
             from_ = os.path.join(walk_root, f)
-            to_ = os.path.join(walk_root, f[:-len('.wav_trg_gen.wav')] + '_org.wav')
+            to_ = os.path.join(walk_root, 'rec_' + f[:-len('.wav_trg_gen.wav')] + '.wav')
             os.rename(from_, to_)
 
 def convert_whole_folder(
@@ -184,7 +184,8 @@ def convert_whole_folder(
             targets.append(single_speaker_targets)
 
     for single_speaker_targets in targets:
-        main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=single_speaker_targets, save_dir=save_dir_root, generate_debug_recs=False)
+        main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=single_speaker_targets, save_dir=save_dir_root,
+             generate_debug_recs=True)
     rename_converted_files(save_dir_root)
 
 
