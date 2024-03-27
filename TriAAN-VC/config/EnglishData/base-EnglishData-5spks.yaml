@@ -32,7 +32,7 @@ model:
       num_layer:     6
 
 train:
-  epoch:        800
+  epoch:        400
   batch_size:   48 # maximum for titan
   lr:           1e-4
   loss:         l1
