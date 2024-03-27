@@ -182,7 +182,7 @@ def main(config_path):
         logger.info(f"train: {get_log_results_str(train_results)}")
         logger.info(f"eval : {get_log_results_str(eval_results)}")
 
-        save_if_best(total_eval_loss, log_dir, epoch)
+        # save_if_best(total_eval_loss, log_dir, epoch)
 
         if (epoch % save_freq) == 0:
             print("Saving...")

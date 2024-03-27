@@ -285,4 +285,4 @@ class Trainer(object):
 
         eval_losses = {key: np.mean(value) for key, value in eval_losses.items()}
         eval_losses.update(eval_images)
-        return eval_losses, g_loss_cumulative/iters
+        return eval_losses, g_loss_cumulative/(iters+1)
