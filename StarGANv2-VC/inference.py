@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import torchaudio
 import librosa
 import time
+import pathlib
 
 from Utils.ASR.models import ASRCNN
 from Utils.JDC.model import JDCNet
@@ -43,16 +44,16 @@ def __build_model(model_params):
 
 def __compute_style(starganv2, speaker_dicts):
     reference_embeddings = {}
-    for speaker_id, (src_path, speaker_idx, cnv_path) in speaker_dicts.items():
+    for speaker_id, (target_rec_path, speaker_idx, converted_rec_path) in speaker_dicts.items():
         if speaker_idx is None:
-            # print("unseen")
+            print("unseen")
             speaker_idx = random.randint(0, len(speaker_dicts))
             label = torch.LongTensor([speaker_idx]).to(device)
             latent_dim = starganv2.mapping_network.shared[0].in_features
             ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
         else:
-            # print("seen")
-            wave, sr = librosa.load(src_path, sr=24000)
+            print("seen")
+            wave, sr = librosa.load(target_rec_path, sr=24000)
             audio, index = librosa.effects.trim(wave, top_db=30)
             if sr != 24000:
                 wave = librosa.resample(wave, sr, 24000)
@@ -61,7 +62,7 @@ def __compute_style(starganv2, speaker_dicts):
             with torch.no_grad():
                 label = torch.LongTensor([speaker_idx])
                 ref = starganv2.style_encoder(mel_tensor.unsqueeze(1), label)
-        reference_embeddings[speaker_id] = (ref, label, cnv_path)
+        reference_embeddings[speaker_id] = (ref, label, converted_rec_path)
 
     return reference_embeddings
 
@@ -109,21 +110,28 @@ def convert(
         f0_model,
         starganv2,
         vocoder,
-        source_wav_path,
+        src_path,
         targets,
         root_dir_to_save_samples,
-        spk_id_label_mapping,
+        speaker_label_mapping,
         generate_debug_recs
 ):
-    source_audio, _ = librosa.load(source_wav_path, sr=24000)
+    source_audio, _ = librosa.load(src_path, sr=24000)
     source_audio = source_audio / np.max(np.abs(source_audio))
     source_audio.dtype = np.float32
 
+    src_speaker_id = os.path.basename(os.path.dirname(src_path))
+
     target_speakers_dict = {}
-    for _, (spk_id_plus_rec, src_pth, cnv_path) in enumerate(targets):
-        spk_id = spk_id_plus_rec.split('====')[0]
-        label_idx = spk_id_label_mapping[spk_id]
-        target_speakers_dict[spk_id_plus_rec] = (src_pth, label_idx, cnv_path)
+    for _, (target_rec_path) in enumerate(targets):
+        target_spk_id = os.path.basename(os.path.dirname(target_rec_path))
+        speaker_idx = speaker_label_mapping[target_spk_id] if target_spk_id in speaker_label_mapping else None
+
+        converted_rec_dir = os.path.join(root_dir_to_save_samples, f'{src_speaker_id}_in_voice_of_{target_spk_id}')
+        pathlib.Path(converted_rec_dir).mkdir(parents=True, exist_ok=True)
+        converted_rec_path = os.path.join(converted_rec_dir, os.path.basename(target_rec_path))
+        target_speakers_dict[target_spk_id] = (target_rec_path, speaker_idx, converted_rec_path)
+
     targets_reference_embeddings = __compute_style(starganv2, target_speakers_dict)
     start = time.time()
 
@@ -149,7 +157,7 @@ def convert(
         reconstructed_samples[key] = recon
 
     end = time.time()
-    print('total processing time: %.3f sec\n\n' % (end - start))
+    print('total processing time: %.3f sec' % (end - start))
 
     for target_speaker_id, (wave, cnv_path) in converted_samples.items():
         cnv_path_dir = os.path.dirname(cnv_path)
@@ -159,33 +167,34 @@ def convert(
         if generate_debug_recs:
             display(cnv_path_dir, reconstructed_samples[target_speaker_id], f'rec_{cnv_path_filename}')
 
-    if generate_debug_recs:
-        wave, sr = librosa.load(source_wav_path, sr=24000)
-        mel = __preprocess(wave)
-        c = mel.transpose(-1, -2).squeeze().to(device)
-        with torch.no_grad():
-            recon = vocoder.inference(c)
-            recon = recon.view(-1).cpu().numpy()
+    # if generate_debug_recs:
+    #     wave, sr = librosa.load(src_path, sr=24000)
+    #     mel = __preprocess(wave)
+    #     c = mel.transpose(-1, -2).squeeze().to(device)
+    #     with torch.no_grad():
+    #         recon = vocoder.inference(c)
+    #         recon = recon.view(-1).cpu().numpy()
+    #
+    #     display(root_dir_to_save_samples, recon, f'reconstructed_source_by_vocoder.wav')
+    #     display(root_dir_to_save_samples, wave, f'original.wav')
 
-        display(root_dir_to_save_samples, recon, f'reconstructed_source_by_vocoder.wav')
-        display(root_dir_to_save_samples, wave, f'original.wav')
 
+ENGLISH_DATA_SEEN_PATH = '../../Data/EnglishData/test-seen'
+ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
 
-def get_stargan_demodata():
-    model_checkpoint = '../../Models/stargan/demodata/'
-    data_path = '../../Data/DemoData-2-splitted'
-    speaker_label_mapping = {
-        'p226': 10, 'p243': 14, 'p259': 7, 'p256': 11, 'p240': 9, 'p258': 13, 'p230': 12, 'p270': 8, 'p236': 5,
-        'p231': 0, 'p229': 6, 'p233': 1, 'p232': 4, 'p227': 2, 'p244': 3}
+def get_english_data_2spks():
+    model_checkpoint = '../../Models/EnglishData-2spks/stargan/'
+    speaker_label_mapping = {'VCC2SF1': 0, 'VCC2SM1': 1}
+    where_to_save_samples = '../../samples/EnglishData-2spks/stargan/'
 
     return (
-        os.path.join(model_checkpoint, 'config-DemoData.yml'),
-        os.path.join(model_checkpoint, 'final_00150_epochs.pth'),
+        os.path.join(model_checkpoint, 'config-EnglishData-2spks.yml'),
+        os.path.join(model_checkpoint, 'final_00500_epochs.pth'),
         "Utils/JDC/bst.t7",
         "Vocoder/checkpoint-400000steps.pkl",
-        os.path.join(data_path, 'TRAIN/p226/1.wav'),
-        '../../Data/DemoData-2-splitted/TEST/SEEN',
-        '../../samples/TEST-STARGAN',
+        ENGLISH_DATA_SEEN_PATH,
+        ENGLISH_DATA_UNSEEN_PATH,
+        where_to_save_samples,
         speaker_label_mapping
     )
 
@@ -194,34 +203,42 @@ def convert_whole_folder(
     f0_model,
     stargan,
     vocoder,
-    data_path: str,
-    save_dir_root: str,
-    source_path: str,
+    seen_dir: str,
+    unseen_dir: str,
+    where_to_save_samples: str,
     speaker_label_mapping
 ):
-    os.makedirs(save_dir_root, exist_ok=True)
-    targets = []
-    for walk_root, dirs, files in os.walk(data_path):
-        walk_root = os.path.normpath(walk_root)
-        for d in dirs:
-            relative_dir_path = walk_root[len(data_path):]
-            dir_to_create = os.path.normpath(save_dir_root + relative_dir_path + '/' + d)
-            os.makedirs(dir_to_create, exist_ok=True)
-        if len(files) > 0:
-            speaker_id = walk_root[len(os.path.dirname(walk_root)) + 1:]
-            relative_dir_path = walk_root[len(data_path):]
-            dir_to_save_converted_recs = save_dir_root + relative_dir_path
-            for f in files:
-                org_path = os.path.normpath(os.path.join(walk_root, f))
-                cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
-                targets.append((f"{speaker_id}===={f}", org_path, cnv_path))
+    pathlib.Path(where_to_save_samples).mkdir(parents=True, exist_ok=True)
 
-    convert(f0_model, stargan, vocoder, source_path, targets, save_dir_root, speaker_label_mapping,
-            generate_debug_recs=True)
+    def get_rec_pairs_between_two_speakers_in_single_dir(directory: str):
+        seen_spks = os.listdir(directory)
+        assert len(seen_spks) == 2
+        spk1_recs = sorted(os.listdir(os.path.join(directory, seen_spks[0])))
+        spk1_recs = list(map(lambda f: os.path.join(directory, seen_spks[0], f), spk1_recs))
+        spk2_recs = sorted(os.listdir(os.path.join(directory, seen_spks[1])))
+        spk2_recs = list(map(lambda f: os.path.join(directory, seen_spks[1], f), spk2_recs))
+
+        seen_recs = list(zip(spk1_recs, spk2_recs))
+        for r1, r2 in seen_recs:
+            assert os.path.basename(r1) == os.path.basename(r2)
+        seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+
+        return seen_recs + seen_recs_reversed
+
+    total_seen_recs = get_rec_pairs_between_two_speakers_in_single_dir(seen_dir)
+    total_unseen_recs = get_rec_pairs_between_two_speakers_in_single_dir(unseen_dir)
+
+    for src, trg in total_seen_recs:
+        convert(f0_model, stargan, vocoder, src, [trg], os.path.join(where_to_save_samples, 'seen'), speaker_label_mapping,
+                generate_debug_recs=False)
+
+    for src, trg in total_unseen_recs:
+        convert(f0_model, stargan, vocoder, src, [trg], os.path.join(where_to_save_samples, 'unseen'), speaker_label_mapping,
+                generate_debug_recs=False)
 
 
 def main():
-    cfg_path, stargan_path, f0_model_path, vocoder_path, source_path, dir_of_recs_to_be_converted, root_dir_to_save_samples, speaker_label_mapping = get_stargan_demodata()
+    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = get_english_data_2spks()
 
     f0_model = load_f0_model(f0_model_path)
     stargan = load_stargan(stargan_path, cfg_path)
@@ -229,7 +246,7 @@ def main():
 
     convert_whole_folder(
         f0_model=f0_model, stargan=stargan, vocoder=vocoder,
-        data_path=dir_of_recs_to_be_converted, save_dir_root=root_dir_to_save_samples, source_path=source_path,
+        seen_dir=seen_dir, unseen_dir=unseen_dir, where_to_save_samples=where_to_save_samples,
         speaker_label_mapping=speaker_label_mapping
     )
 
