@@ -38,7 +38,8 @@ def main(cfg):
     train_results = Parallel(n_jobs=-1)(delayed(SaveFeatures)(wav_name, wn2info[os.path.normpath(wav_name)], 'train', cfg) for wav_name in tqdm(train_wavs_names))
     valid_results = Parallel(n_jobs=-1)(delayed(SaveFeatures)(wav_name, wn2info[os.path.normpath(wav_name)], 'valid', cfg) for wav_name in tqdm(valid_wavs_names))
     # test_results  = Parallel(n_jobs=-1)(delayed(SaveFeatures)(wav_name, wn2info[wav_name], 'test', cfg) for wav_name in tqdm(test_wavs_names))
-
+    os.makedirs(os.path.join(cfg.output_path, 'valid', 'mels'), exist_ok=True)
+    os.makedirs(os.path.join(cfg.output_path, 'valid', 'lf0'), exist_ok=True)
     # train_results, valid_results, test_results = GetMetaResults(train_results, valid_results, test_results, cfg)
 
     print('---Write Infos---')
@@ -49,6 +50,10 @@ def main(cfg):
 
 
 if __name__ == '__main__':
-    # cfg = Config('./config/preprocess-DemoData.yaml')
-    cfg = Config('./config/preprocess-PolishData.yaml')
-    main(cfg)
+    english_data_cfgs_path = './config/EnglishData'
+    english_data_cfgs = os.listdir(english_data_cfgs_path)
+    preprocess_cfgs = list(filter(lambda f: 'preprocess' in f, english_data_cfgs))
+    for cfg_name in preprocess_cfgs:
+        print(cfg_name)
+        cfg = Config(os.path.join(english_data_cfgs_path, cfg_name))
+        main(cfg)

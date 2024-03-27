@@ -14,6 +14,7 @@ import json
 import yaml
 import argparse
 import time
+import pathlib
 
 from src.train import *
 from src.dataset import *
@@ -28,7 +29,7 @@ def save_execution_time(log_dir, total_time):
     f.close()
 
 
-def main(cfg, save_dir):
+def main(cfg, save_dir, should_eval):
     seed_init(seed=cfg.seed)
     if args.action == 'train':
         
@@ -41,7 +42,7 @@ def main(cfg, save_dir):
         
         data_loader   = {'train':train_loader, 'valid':val_loader}
         
-        trainer = Trainer(data_loader, cfg)
+        trainer = Trainer(data_loader, cfg, should_eval)
 
         start_training_time = time.time()
         trainer.train()
@@ -62,22 +63,15 @@ def main(cfg, save_dir):
         tester.test(set_type='test')
 
 
-def get_test_data():
-    return './config/base-TEST.yaml', '../../Models/triann/test'
+def get_english_data(directory: str):
+    return f'./config/EnglishData/base-EnglishData-{directory}.yaml', f'../../Models/EnglishData-{directory}/triann', directory != '2spks'
 
-
-def get_demodata():
-    return './config/base-DemoData.yaml', '../../Models/triann/demodata'
-
-
-def get_polishdata():
-    return './config/base-PolishData.yaml', '../../Models/triann/polishdata'
 
 
 if __name__ == "__main__":
-    cfg, save_dir = get_test_data()
-    # cfg, save_dir = get_demodata()
-    # cfg, save_dir = get_polishdata()
+    cfg, save_dir, should_eval = get_english_data('2spks')
+
+    pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, default='train', help='Action') # train / test
@@ -95,4 +89,4 @@ if __name__ == "__main__":
     cfg  = Config(args.config)
     cfg  = set_experiment(args, cfg) # merge arg and cfg, make directories
     print(cfg)
-    main(cfg, save_dir)
+    main(cfg, save_dir, should_eval)

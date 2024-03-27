@@ -180,8 +180,12 @@ def SplitDataset(all_spks, cfg):
     # train_spks = all_spks[:-cfg.eval_spks * 2]  # except valid and test unseen speakers
     # valid_spks = all_spks[-cfg.eval_spks * 2:-cfg.eval_spks]
     # test_spks  = all_spks[-cfg.eval_spks:]
-    train_spks = all_spks[:-cfg.eval_spks]
-    valid_spks = all_spks[-cfg.eval_spks:]
+    if len(all_spks) == cfg.eval_spks:  # when 2 speakers in dataset
+        train_spks = all_spks
+        valid_spks = []
+    else:
+        train_spks = all_spks[:-cfg.eval_spks]
+        valid_spks = all_spks[-cfg.eval_spks:]
 
     train_wavs_names = []
     valid_wavs_names = []

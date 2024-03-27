@@ -19,8 +19,8 @@ from tqdm import tqdm
 
 class Trainer:
 
-    def __init__(self, data, cfg):
-
+    def __init__(self, data, cfg, should_eval):
+        self.should_eval = should_eval
         self.cfg       = cfg
         self.model     = TriAANVC(cfg.model.encoder, cfg.model.decoder).to(cfg.device)
         self.criterion = self._select_loss().to(cfg.device)
@@ -78,13 +78,16 @@ class Trainer:
             self.model.train()
             train_loss = self._run_epoch(self.train_loader)               
 
-            self.model.eval()
-            with torch.no_grad():
-                val_loss = self._run_epoch(self.val_loader, valid=True)
+            if self.should_eval:
+                self.model.eval()
+                with torch.no_grad():
+                    val_loss = self._run_epoch(self.val_loader, valid=True)
 
-            if val_loss < best_loss:
-                best_loss = val_loss
-                self._save_checkpoint([best_loss], epoch, opt='best')      
+                if val_loss < best_loss:
+                    best_loss = val_loss
+                    self._save_checkpoint([best_loss], epoch, opt='best')
+            else:
+                val_loss = 0
 
             if epoch % self.cfg.train.save_epoch == 0:
                 self._save_checkpoint([val_loss], epoch, opt='epoch')               
