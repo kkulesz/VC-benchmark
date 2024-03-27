@@ -12,6 +12,7 @@ import torch
 import click
 import warnings
 warnings.simplefilter('ignore')
+import pathlib
 
 from functools import reduce
 from munch import Munch
@@ -47,7 +48,8 @@ def main(config_path):
     print(f"log_dir: {config['log_dir']}")
 
     log_dir = config['log_dir']
-    if not osp.exists(log_dir): os.makedirs(log_dir, exist_ok=True)
+    if not osp.exists(log_dir):
+        pathlib.Path(log_dir).mkdir(parents=True, exist_ok=True)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
     # writer = SummaryWriter(log_dir + "/tensorboard")
 
