@@ -179,25 +179,6 @@ def convert(
     #     display(root_dir_to_save_samples, wave, f'original.wav')
 
 
-ENGLISH_DATA_SEEN_PATH = '../../Data/EnglishData/test-seen'
-ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
-
-def get_english_data_2spks():
-    model_checkpoint = '../../Models/EnglishData-2spks/stargan/'
-    speaker_label_mapping = {'VCC2SF1': 0, 'VCC2SM1': 1}
-    where_to_save_samples = '../../samples/EnglishData-2spks/stargan/'
-
-    return (
-        os.path.join(model_checkpoint, 'config-EnglishData-2spks.yml'),
-        os.path.join(model_checkpoint, 'final_00500_epochs.pth'),
-        "Utils/JDC/bst.t7",
-        "Vocoder/checkpoint-400000steps.pkl",
-        ENGLISH_DATA_SEEN_PATH,
-        ENGLISH_DATA_UNSEEN_PATH,
-        where_to_save_samples,
-        speaker_label_mapping
-    )
-
 
 def convert_whole_folder(
     f0_model,
@@ -238,7 +219,8 @@ def convert_whole_folder(
 
 
 def main():
-    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = get_english_data_2spks()
+    import inference_utils
+    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = inference_utils.get_english_data(2)
 
     f0_model = load_f0_model(f0_model_path)
     stargan = load_stargan(stargan_path, cfg_path)
