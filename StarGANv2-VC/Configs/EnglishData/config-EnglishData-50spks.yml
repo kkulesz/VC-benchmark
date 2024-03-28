@@ -1,7 +1,7 @@
 log_dir: "../../Models/EnglishData-50spks/stargan"
-save_freq: 50
+save_freq: 100
 device: "cuda"
-epochs: 150
+epochs: 200
 batch_size: 10
 pretrained_model: ""
 load_only_params: false
