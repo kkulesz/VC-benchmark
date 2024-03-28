@@ -110,10 +110,10 @@ def decode(feats_scp, outdir, device):
             rtf   = (time.time() - start) / (len(y) / config["sampling_rate"])
             pbar.set_postfix({"RTF": rtf})
             total_rtf += rtf
-
             # save as PCM 16 bit wav file
             sf.write(
-                os.path.join(config["outdir"], f"{utt_id}_gen.wav"),
+                # os.path.join(config["outdir"], f"{utt_id}_gen.wav"),
+                f"{utt_id}_gen.wav",
                 y.cpu().numpy(),
                 config["sampling_rate"],
                 "PCM_16",

@@ -14,6 +14,7 @@ import json
 import yaml
 import argparse
 import soundfile as sf
+import pathlib
 import torch
 import kaldiio
 import librosa
@@ -93,7 +94,7 @@ def main(cfg, mel_stats_path, source, targets, save_dir, generate_debug_recs):
     
     output_list = []
     model       = TriAANVC(cfg.model.encoder, cfg.model.decoder).to(cfg.device)
-    checkpoint  = torch.load(f'{cfg.checkpoint}/{cfg.model_name}', map_location=cfg.device)
+    checkpoint  = torch.load(f'{cfg.model_name}', map_location=cfg.device)
     
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
@@ -135,7 +136,6 @@ def main(cfg, mel_stats_path, source, targets, save_dir, generate_debug_recs):
                 feat_writer[filename + '_cnv'] = output
                 if generate_debug_recs:
                     feat_writer[filename + '_trg'] = trg_mel
-
             feat_writer.close()
             print('synthesize waveform...')
             decode(f'{cnv_path_dir}/feats.1.scp', save_dir, cfg.device)
@@ -160,50 +160,64 @@ def rename_converted_files(data_path):
 def convert_whole_folder(
         cfg,
         stats_path: str,
-        data_path: str,
-        save_dir_root: str,
-        src_speaker_path: str
+        seen_dir: str,
+        unseen_dir: str,
+        where_to_save_samples: str
 ):
-    os.makedirs(save_dir_root, exist_ok=True)
-    # (original_file_path, converted_file_path)
-    targets = []
-    for walk_root, dirs, files in os.walk(data_path):
-        walk_root = os.path.normpath(walk_root)
-        for d in dirs:
-            relative_dir_path = walk_root[len(data_path):]
-            dir_to_create = os.path.normpath(save_dir_root + relative_dir_path + '/' + d)
-            os.makedirs(dir_to_create, exist_ok=True)
-        if len(files) > 0:
-            relative_dir_path = walk_root[len(data_path):]
-            dir_to_save_converted_recs = save_dir_root + relative_dir_path
-            single_speaker_targets = []
-            for f in files:
-                org_path = os.path.normpath(os.path.join(walk_root, f))
-                cnv_path = os.path.normpath(os.path.join(dir_to_save_converted_recs, f))
-                single_speaker_targets.append((org_path, cnv_path))
-            targets.append(single_speaker_targets)
+    pathlib.Path(where_to_save_samples).mkdir(parents=True, exist_ok=True)
+    def get_rec_pairs_between_two_speakers_in_single_dir(directory: str):
+        seen_spks = os.listdir(directory)
+        assert len(seen_spks) == 2
+        spk1_recs = sorted(os.listdir(os.path.join(directory, seen_spks[0])))
+        spk1_recs = list(map(lambda f: os.path.join(directory, seen_spks[0], f), spk1_recs))
+        spk2_recs = sorted(os.listdir(os.path.join(directory, seen_spks[1])))
+        spk2_recs = list(map(lambda f: os.path.join(directory, seen_spks[1], f), spk2_recs))
 
-    for single_speaker_targets in targets:
-        main(cfg=cfg, mel_stats_path=stats_path, source=src_speaker_path, targets=single_speaker_targets, save_dir=save_dir_root,
-             generate_debug_recs=True)
-    rename_converted_files(save_dir_root)
+        seen_recs = list(zip(spk1_recs, spk2_recs))
+        for r1, r2 in seen_recs:
+            assert os.path.basename(r1) == os.path.basename(r2)
+        seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+
+        return seen_recs + seen_recs_reversed
+
+    total_seen_recs = get_rec_pairs_between_two_speakers_in_single_dir(seen_dir)
+    total_unseen_recs = get_rec_pairs_between_two_speakers_in_single_dir(unseen_dir)
+
+    def convert_recs_to_directory(directory: str, recs):
+        for src, trg in recs:
+            save_dir = os.path.join(where_to_save_samples, directory)
+            src_speaker_id = os.path.basename(os.path.dirname(src))
+            target_spk_id = os.path.basename(os.path.dirname(trg))
+            converted_rec_dir = os.path.normpath(os.path.join(save_dir, f'{src_speaker_id}_in_voice_of_{target_spk_id}'))
+            pathlib.Path(converted_rec_dir).mkdir(parents=True, exist_ok=True)
+
+            target = (trg, os.path.join(converted_rec_dir, os.path.basename(src)))
+            main(cfg=cfg, mel_stats_path=stats_path, source=src, targets=[target], save_dir=converted_rec_dir, generate_debug_recs=False)
+
+    convert_recs_to_directory('seen', total_seen_recs)
+    convert_recs_to_directory('unseen', total_unseen_recs)
+    rename_converted_files(where_to_save_samples)
 
 
-def get_stargan_demodata():
-    model_checkpoint = '../../Models/triann/demodata/'
+ENGLISH_DATA_SEEN_PATH = '../../Data/EnglishData/test-seen'
+ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
+
+def get_english_data_2spks():
+    model_checkpoint = '../../Models/EnglishData-2spks/triann'
+    where_to_save_samples = '../../samples/EnglishData-2spks/triann'
 
     return (
-        os.path.join(model_checkpoint, 'base-DemoData.yaml'),
-        os.path.join(model_checkpoint, 'model-best.pth'),  # model-500.pth
+        os.path.join(model_checkpoint, 'base-EnglishData-2spks.yaml'),
+        os.path.join(model_checkpoint, 'model-500.pth'),
         os.path.join(model_checkpoint, 'mel_stats.npy'),
-        os.path.join('../../Data/DemoData-2-splitted/', 'TRAIN/p226/1.wav'),
-        "../../samples/TEST-TRIANN",
-        '../../Data/DemoData-2-splitted/TEST/SEEN'
+        ENGLISH_DATA_SEEN_PATH,
+        ENGLISH_DATA_UNSEEN_PATH,
+        where_to_save_samples
     )
 
 
 if __name__ == "__main__":
-    cfg, model, mel_stats_path, src_path, save_dir, data_path = get_stargan_demodata()
+    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = get_english_data_2spks()
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
@@ -211,7 +225,7 @@ if __name__ == "__main__":
     # parser.add_argument('--src_name', type=str, nargs='+', default=['src.flac'], help='Sample source name')
     # parser.add_argument('--trg_name', type=str, nargs='+', default=['trg.flac'], help='Sample target name')
 
-    parser.add_argument('--checkpoint', type=str, default=save_dir, help='Results load path')
+    parser.add_argument('--checkpoint', type=str, default=where_to_save_samples, help='Results load path')
     parser.add_argument('--model_name', type=str, default=model, help='Best model name')
     parser.add_argument('--seed', type=int, default=1234, help='Seed')
     
@@ -223,6 +237,6 @@ if __name__ == "__main__":
     convert_whole_folder(
         cfg=cfg,
         stats_path=mel_stats_path,
-        data_path=data_path,
-        save_dir_root=save_dir,
-        src_speaker_path=src_path)
+        seen_dir=seen_dir,
+        unseen_dir=unseen_dir,
+        where_to_save_samples=where_to_save_samples)
