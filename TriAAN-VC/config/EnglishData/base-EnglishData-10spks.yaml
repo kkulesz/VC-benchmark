@@ -32,12 +32,12 @@ model:
       num_layer:     6
 
 train:
-  epoch:        250
+  epoch:        500
   batch_size:   48 # maximum for titan
   lr:           1e-4
   loss:         l1
-  eval_every:   50
-  save_epoch:   50
+  eval_every:   100
+  save_epoch:   100
   siam:         true
   cpc:          true
 
