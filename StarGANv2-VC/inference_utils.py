@@ -8,7 +8,7 @@ ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
 def get_english_data(spks: int):
     model_checkpoint = f'../../Models/EnglishData-{spks}spks/stargan/'
 
-    with open(os.path.join(model_checkpoint, 'speaker-mapping.txt')) as f:
+    with open(os.path.join(model_checkpoint, 'speaker_mapping.txt')) as f:
         data = f.read()
         data = data.replace('\'', '\"')
         speaker_label_mapping = json.loads(data)
