@@ -11,7 +11,6 @@ Models used:
   - TODO: inference, training own model, inference with own model
 
 Other repositories used:
-- mcd - https://github.com/MattShannon/mcd
 - MOSNet - https://github.com/lochenchou/MOSNet / https://arxiv.org/abs/1904.08352
 
 ---
