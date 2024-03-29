@@ -5,8 +5,8 @@ import json
 from statistics import mean
 from typing import Tuple, List, Callable
 
-from metrics.mcd import mcd
-from metrics.snr import snr
+from metrics.mcd import MCD
+from metrics.snr import SNR
 
 
 def get_dir_pairs(spks: int, model: str):
@@ -60,8 +60,8 @@ def main():
         paired = get_paths(reference_path, converted_path)
 
         results = {}
-        for metric_func in [mcd, snr]:
-            result = get_all_results_over_directory(mcd, paired)
+        for metric_func in [MCD, SNR]:
+            result = get_all_results_over_directory(metric_func, paired)
             results[metric_func.__name__] = result
 
         with open(os.path.join(converted_path, 'results.json'), 'w') as f:

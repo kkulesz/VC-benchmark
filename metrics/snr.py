@@ -1,8 +1,13 @@
 import math
+import librosa
 import numpy as np
 
 
-def snr(original, converted):
-    a = math.sqrt(np.mean(original ** 2))
-    b = math.sqrt(np.mean(converted ** 2))
+def SNR(f1_path: str, f2_path: str):
+    y1, _ = librosa.load(f1_path)
+    y2, _ = librosa.load(f2_path)
+
+    a = math.sqrt(np.mean(y1 ** 2))
+    b = math.sqrt(np.mean(y2 ** 2))
+
     return 10 * np.log10(a / b)

@@ -4,7 +4,7 @@ from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
 
 
-def mcd(f1_path: str, f2_path: str) -> float:
+def MCD(f1_path: str, f2_path: str) -> float:
     y1, sr1 = librosa.load(f1_path)
     y2, sr2 = librosa.load(f2_path)
 
