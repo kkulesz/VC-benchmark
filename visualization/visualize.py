@@ -56,8 +56,8 @@ def filter_results_and_reformat_it(
     x_ticks = df_stargan['number_of_speakers'].tolist()
     y_label = metric
     models_plot_properties = [
-        ('StarGANv2-VC', 'red', metric_stargan + [800]), # TODO remove those
-        ('TriANN-VC', 'blue', metric_triann + [900]) # TODO: remove those
+        ('StarGANv2-VC', 'red', metric_stargan),
+        ('TriANN-VC', 'blue', metric_triann)
     ]
 
     return plot_title, y_label, x_ticks, models_plot_properties
@@ -96,7 +96,7 @@ def main():
 
     df = read_results('../../samples')
     plot_title, y_label, x_ticks, models_plot_properties = \
-        filter_results_and_reformat_it(seen=True, male_to_female=True, metric='MCD', df=df, plot_title='MCD over number os speakers in training dataset')
+        filter_results_and_reformat_it(seen=False, male_to_female=True, metric='MCD', df=df, plot_title='MCD over number os speakers in training dataset')
 
     bar_plot_of_metric_over_number_of_speakers_for_each_model(plot_title, y_label, x_ticks, models_plot_properties)
 
