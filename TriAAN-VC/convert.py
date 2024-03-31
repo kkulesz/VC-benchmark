@@ -199,25 +199,9 @@ def convert_whole_folder(
     rename_converted_files(where_to_save_samples)
 
 
-ENGLISH_DATA_SEEN_PATH = '../../Data/EnglishData/test-seen'
-ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
-
-def get_english_data_2spks():
-    model_checkpoint = '../../Models/EnglishData-2spks/triann'
-    where_to_save_samples = '../../samples/EnglishData-2spks/triann'
-
-    return (
-        os.path.join(model_checkpoint, 'base-EnglishData-2spks.yaml'),
-        os.path.join(model_checkpoint, 'model-500.pth'),
-        os.path.join(model_checkpoint, 'mel_stats.npy'),
-        ENGLISH_DATA_SEEN_PATH,
-        ENGLISH_DATA_UNSEEN_PATH,
-        where_to_save_samples
-    )
-
-
 if __name__ == "__main__":
-    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = get_english_data_2spks()
+    import convert_utils
+    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = convert_utils.get_english_data(50)
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')

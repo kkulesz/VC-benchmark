@@ -1,9 +1,9 @@
 import os
 import json
-import ast
 
 ENGLISH_DATA_SEEN_PATH = '../../Data/EnglishData/test-seen'
 ENGLISH_DATA_UNSEEN_PATH = '../../Data/EnglishData/test-unseen'
+
 
 def get_english_data(spks: int):
     model_checkpoint = f'../../Models/EnglishData-{spks}spks/stargan/'
@@ -29,4 +29,3 @@ def get_english_data(spks: int):
         where_to_save_samples,
         speaker_label_mapping
     )
-
