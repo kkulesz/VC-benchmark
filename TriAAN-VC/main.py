@@ -69,7 +69,7 @@ def get_english_data(directory: str):
 
 
 if __name__ == "__main__":
-    cfg, save_dir, should_eval = get_english_data('50spks')
+    cfg, save_dir, should_eval = get_english_data('10spks')
 
     pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
 

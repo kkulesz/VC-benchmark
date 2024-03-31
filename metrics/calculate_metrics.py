@@ -55,7 +55,7 @@ def get_all_results_over_directory(metric_func: Callable, paired: List[Tuple[str
 
 
 def main():
-    dir_pairs = get_dir_pairs(50, 'stargan')
+    dir_pairs = get_dir_pairs(10, 'stargan')
     for reference_path, converted_path in dir_pairs:
         paired = get_paths(reference_path, converted_path)
 
