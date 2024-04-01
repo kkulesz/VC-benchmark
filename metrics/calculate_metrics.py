@@ -68,7 +68,7 @@ def main():
 
             with open(os.path.join(converted_path, 'results.json'), 'w') as f:
                 json.dump(results, f)
-            print(model + ' | ' + spks + ' | ' + 'unseen' not in reference_path)
+            print(model + ' | ' + str(spks) + ' | ' + str('unseen' not in reference_path))
             print(results)
 
 

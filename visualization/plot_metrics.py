@@ -57,6 +57,8 @@ def filter_results_and_reformat_it(
     max_value = max(metric_triann + metric_stargan)
     if metric == 'MCD':
         y_limits = [5, 8]
+    elif metric == 'SNR':
+        y_limits = [0, 2.7]
     else:
         y_limits = (0.8 * min_value, 1.05 * max_value)
 

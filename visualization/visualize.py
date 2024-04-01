@@ -5,12 +5,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+MCD = 'MCD'
+SNR = 'SNR'
+
 
 def plot_metrics():
     import plot_metrics
-    seen = False
+    seen = True
     male_to_female = True
-    metric = 'MCD'
+    metric = SNR
 
     df = plot_metrics.read_results('../../samples')
     plot_title, y_label, x_ticks, models_plot_properties, bottom = \
