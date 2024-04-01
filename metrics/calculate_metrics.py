@@ -2,6 +2,7 @@ import os
 
 import glob
 import json
+import itertools
 from statistics import mean
 from typing import Tuple, List, Callable
 
@@ -55,18 +56,19 @@ def get_all_results_over_directory(metric_func: Callable, paired: List[Tuple[str
 
 
 def main():
-    dir_pairs = get_dir_pairs(10, 'stargan')
-    for reference_path, converted_path in dir_pairs:
-        paired = get_paths(reference_path, converted_path)
+    for spks, model in itertools.product([2, 10, 50], ['triann', 'stargan']):
+        dir_pairs = get_dir_pairs(spks, model)
+        for reference_path, converted_path in dir_pairs:
+            paired = get_paths(reference_path, converted_path)
 
-        results = {}
-        for metric_func in [MCD, SNR]:
-            result = get_all_results_over_directory(metric_func, paired)
-            results[metric_func.__name__] = result
+            results = {}
+            for metric_func in [MCD, SNR]:
+                result = get_all_results_over_directory(metric_func, paired)
+                results[metric_func.__name__] = result
 
-        with open(os.path.join(converted_path, 'results.json'), 'w') as f:
-            json.dump(results, f)
-        print(results)
+            with open(os.path.join(converted_path, 'results.json'), 'w') as f:
+                json.dump(results, f)
+            print(results)
 
 
 if __name__ == '__main__':

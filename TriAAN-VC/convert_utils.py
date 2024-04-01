@@ -11,7 +11,7 @@ def get_english_data(spks: int):
 
     return (
         os.path.join(model_checkpoint, f'base-EnglishData-{spks}spks.yaml'),
-        os.path.join(model_checkpoint, 'model-best.pth'),
+        os.path.join(model_checkpoint, 'model-last.pth'),
         os.path.join(model_checkpoint, 'mel_stats.npy'),
         ENGLISH_DATA_SEEN_PATH,
         ENGLISH_DATA_UNSEEN_PATH,
