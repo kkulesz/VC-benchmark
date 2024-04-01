@@ -10,4 +10,7 @@ def SNR(f1_path: str, f2_path: str):
     a = math.sqrt(np.mean(y1 ** 2))
     b = math.sqrt(np.mean(y2 ** 2))
 
-    return 10 * np.log10(a / b)
+    # snr = 10 * np.log10(a / b)
+    snr = abs(10 * np.log10(a / b))
+
+    return snr
