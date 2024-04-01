@@ -8,10 +8,14 @@ import pandas as pd
 
 def plot_metrics():
     import plot_metrics
+    seen = False
+    male_to_female = True
+    metric = 'MCD'
+
     df = plot_metrics.read_results('../../samples')
     plot_title, y_label, x_ticks, models_plot_properties, bottom = \
-        plot_metrics.filter_results_and_reformat_it(seen=False, male_to_female=True, metric='MCD', df=df,
-                                                    plot_title='MCD over number os speakers in training dataset')
+        plot_metrics.filter_results_and_reformat_it(seen=seen, male_to_female=male_to_female, metric=metric, df=df,
+                                                    plot_title=f'{metric} over number of {"seen" if seen else "unseen"} speakers in training dataset')
 
     plot_metrics.bar_plot_of_metric_over_number_of_speakers_for_each_model(plot_title, y_label, x_ticks,
                                                                            models_plot_properties, bottom)
