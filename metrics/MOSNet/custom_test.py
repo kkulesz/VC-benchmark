@@ -3,21 +3,23 @@
 
 
 import os
-import time 
+import time
 import numpy as np
 from tqdm import tqdm
 import argparse
 import fnmatch
 
-from statistics import mean 
+from statistics import mean
 
 import tensorflow as tf
 # from tensorflow import keras
 from model import CNN_BLSTM
 
-import utils   
+import utils
 import random
-random.seed(1984) 
+
+random.seed(1984)
+
 
 def find_files(root_dir, query="*.wav", include_root_dir=True):
     """Find files recursively.
@@ -39,6 +41,7 @@ def find_files(root_dir, query="*.wav", include_root_dir=True):
         files = [file_.replace(root_dir + "/", "") for file_ in files]
 
     return files
+
 
 def main(directory):
     parser = argparse.ArgumentParser(
@@ -65,7 +68,7 @@ def main(directory):
             # Currently, memory growth needs to be the same across GPUs
             for gpu in gpus:
                 tf.config.experimental.set_memory_growth(gpu, True)
-                
+
             logical_gpus = tf.config.experimental.list_logical_devices('GPU')
             print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
         except RuntimeError as e:
@@ -76,7 +79,7 @@ def main(directory):
     print(os.listdir(directory))
     # find waveform files
     wavfiles = sorted(find_files(directory, "*.wav"))
-    
+
     # init model
     print("Loading model weights")
     MOSNet = CNN_BLSTM()
@@ -88,31 +91,35 @@ def main(directory):
     results = []
 
     for wavfile in tqdm(wavfiles):
-        
         # spectrogram
         mag_sgram = utils.get_spectrograms(wavfile)
         timestep = mag_sgram.shape[0]
-        mag_sgram = np.reshape(mag_sgram,(1, timestep, utils.SGRAM_DIM))
-        
+        mag_sgram = np.reshape(mag_sgram, (1, timestep, utils.SGRAM_DIM))
+
         # make prediction
         Average_score, Frame_score = model.predict(mag_sgram, verbose=0, batch_size=1)
 
         # write to list
         result = wavfile + " {:.3f}".format(Average_score[0][0])
         results.append(result)
-    
+
     # print average
     average = np.mean(np.array([float(line.split(" ")[-1]) for line in results]))
     print("Average: {}".format(average))
-    
+
     # write final raw result
     resultrawpath = os.path.join(directory, "MOSnet_result_raw.txt")
     with open(resultrawpath, "w") as outfile:
         outfile.write("\n".join(sorted(results)))
         outfile.write("\nAverage: {}\n".format(average))
 
-if __name__ == '__main__':
-    # directory = "../../../samples/TEST-STARGAN"
-    directory = "../../../samples/TEST-TRIANN"
 
-    main(directory)
+def inference_all_sub_dirs(root_directory):
+    for root_dir, dirs, files in os.walk(root_directory):
+        if 'VCC2SF1_in_voice_of_VCC2SM1' in dirs or 'VCC2TF2_in_voice_of_VCC2TM2' in dirs:
+            main(os.path.join(root_dir))
+
+
+if __name__ == '__main__':
+    # main(directory)
+    inference_all_sub_dirs('../../../samples')
