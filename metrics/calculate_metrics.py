@@ -8,6 +8,8 @@ from typing import Tuple, List, Callable
 
 from metrics.mcd import MCD
 from metrics.snr import SNR
+from metrics.log_f0_rmse import LOG_F0_RMSE
+from metrics.msd import MSD
 
 
 def get_dir_pairs(spks: int, model: str):
@@ -63,6 +65,7 @@ def main():
 
             results = {}
             for metric_func in [MCD, SNR]:
+            # for metric_func in [LOG_F0_RMSE, MSD]:
                 result = get_all_results_over_directory(metric_func, paired)
                 results[metric_func.__name__] = result
 
