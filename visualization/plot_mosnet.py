@@ -30,7 +30,7 @@ def read_results(root_directory: str):
     return df
 
 
-def filter_results_and_reformat_it(
+def filter_results_and_reformat_it_between_models(
         seen: bool,
         df: pd.DataFrame,
         plot_title: str
@@ -46,15 +46,39 @@ def filter_results_and_reformat_it(
     metric_stargan = df_stargan['mosnet_score'].tolist()
     metric_triann = df_triann['mosnet_score'].tolist()
 
-    min_value = min(metric_triann + metric_stargan)
-    max_value = max(metric_triann + metric_stargan)
-    y_limits = (2.5, 5)
-
+    y_limits = (2.5, 4.5)
     x_ticks = df_stargan['number_of_speakers'].tolist()
     y_label = 'MOSNet score'
     models_plot_properties = [
         ('StarGANv2-VC', 'red', metric_stargan),
         ('TriANN-VC', 'blue', metric_triann)
+    ]
+
+    return plot_title, y_label, x_ticks, models_plot_properties, y_limits
+
+
+def filter_results_and_reformat_it_between_seen(
+        model: str,
+        df: pd.DataFrame,
+        plot_title: str
+):
+    df = df[df.model == model]
+
+    df_seen = df[df.seen == True]
+    df_unseen = df[df.seen == False]
+
+    df_seen = df_seen.sort_values(['number_of_speakers'])
+    df_unseen = df_unseen.sort_values(['number_of_speakers'])
+
+    metric_seen = df_seen['mosnet_score'].tolist()
+    metric_unseen = df_unseen['mosnet_score'].tolist()
+
+    y_limits = (2.5, 4.5)
+    x_ticks = df_seen['number_of_speakers'].tolist()
+    y_label = 'MOSNet score'
+    models_plot_properties = [
+        ('Seen', 'green', metric_seen),
+        ('Unseen', 'purple', metric_unseen)
     ]
 
     return plot_title, y_label, x_ticks, models_plot_properties, y_limits
