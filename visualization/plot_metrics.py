@@ -26,8 +26,7 @@ def read_results(root_directory: str):
             merged = (m, spks, s, mcd, snr)
 
             results_merged.append(merged)
-        final = pd.DataFrame(results_merged,
-                          columns=['model', 'number_of_speakers', 'seen', 'MCD', 'SNR'])
+        final = pd.DataFrame(results_merged, columns=['model', 'number_of_speakers', 'seen', 'MCD', 'SNR'])
         return final
 
     results = []
@@ -60,7 +59,7 @@ def read_results(root_directory: str):
     return df
 
 
-def filter_results_and_reformat_it(
+def filter_results_and_reformat_it_between_models(
         seen: bool,
         metric: str,
         df: pd.DataFrame,
@@ -95,6 +94,41 @@ def filter_results_and_reformat_it(
 
     return plot_title, y_label, x_ticks, models_plot_properties, y_limits
 
+def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
+        model: str,
+        metric: str,
+        df: pd.DataFrame,
+        plot_title: str
+):
+    df = df[df.model == model]
+
+    df_seen = df[df.seen == True]
+    df_unseen = df[df.seen == False]
+
+    df_seen = df_seen.sort_values(['number_of_speakers'])
+    df_unseen = df_unseen.sort_values(['number_of_speakers'])
+
+    metric_seen = df_seen[metric].tolist()
+    metric_unseen = df_unseen[metric].tolist()
+
+    min_value = min(metric_unseen + metric_seen)
+    max_value = max(metric_unseen + metric_seen)
+    if metric == 'MCD':
+        y_limits = [5, 8]
+    elif metric == 'SNR':
+        y_limits = [0, 2.7]
+    else:
+        y_limits = (0.8 * min_value, 1.05 * max_value)
+
+
+    x_ticks = df_seen['number_of_speakers'].tolist()
+    y_label = metric
+    models_plot_properties = [
+        ('Seen', 'green', metric_seen),
+        ('Unseen', 'purple', metric_unseen)
+    ]
+
+    return plot_title, y_label, x_ticks, models_plot_properties, y_limits
 
 def bar_plot_of_metric_over_number_of_speakers_for_each_model(
         plot_title: str,
