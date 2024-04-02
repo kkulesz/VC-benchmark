@@ -33,14 +33,14 @@ def filter_results_and_reformat_it(
     df_stargan = df[df.model == 'stargan']
     df_triann = df[df.model == 'triann']
 
-    x_ticks = df_stargan['number_of_speakers'].tolist()
-    y_label = 'Training time'
-
-    df_stargan = df_stargan.sort_values(['execution_time'])
-    df_triann = df_triann.sort_values(['execution_time'])
+    df_stargan = df_stargan.sort_values(['number_of_speakers'])
+    df_triann = df_triann.sort_values(['number_of_speakers'])
 
     times_stargan = df_stargan['execution_time'].tolist()
     times_triann = df_triann['execution_time'].tolist()
+
+    x_ticks = df_stargan['number_of_speakers'].tolist()
+    y_label = 'Training time'
 
     models_plot_properties = [
         ('StarGANv2-VC', 'red', times_stargan),
