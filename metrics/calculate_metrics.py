@@ -58,7 +58,7 @@ def get_all_results_over_directory(metric_func: Callable, paired: List[Tuple[str
 
 
 def main():
-    for spks, model in itertools.product([2, 10, 50], ['triann', 'stargan']):
+    for spks, model in itertools.product([2, 5, 10, 50], ['triann', 'stargan']):
         dir_pairs = get_dir_pairs(spks, model)
         for reference_path, converted_path in dir_pairs:
             paired = get_paths(reference_path, converted_path)
