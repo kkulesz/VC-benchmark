@@ -11,24 +11,28 @@ def get_speakers(data_path: str) -> List[str]:
 
 
 def even_recs():
-    input_dataset_path = os.path.join(os.getcwd(), '../../../Data/PolishData-0-original')
-    output_path = os.path.join(os.getcwd(), '../../../Data/PolishData-1-even-recs')
+    input_dataset_path = os.path.join(os.getcwd(), '../../../Data/PolishData-splitted/train')
+    output_path = os.path.join(os.getcwd(), '../../../Data/PolishData/train')
     speakers = get_speakers(input_dataset_path)
 
     preprocess(input_dataset_path, output_path, speakers, save_txt=False)
 
 
-def final_preprocess():
-    input_dataset_path = os.path.join(os.getcwd(), '../../../Data/PolishData-2-splitted/TRAIN')
-    output_path = os.path.join(os.getcwd(), '../../../Data/PolishData-STARGAN-TRAIN')
+def final_preprocess(directory):
+    input_dataset_path = os.path.join(os.getcwd(), f'../../../Data/PolishData/{directory}/raw')
+    output_path = os.path.join(os.getcwd(), f'../../../Data/PolishData/{directory}/stargan')
+    os.makedirs(output_path, exist_ok=True)
     speakers = get_speakers(input_dataset_path)
+    print(speakers)
 
     preprocess(input_dataset_path, output_path, speakers, save_txt=True)
 
 
 def main():
     # even_recs()
-    final_preprocess()
+    dirs = ['5spks', '10spks', '25spks']
+    for d in dirs:
+        final_preprocess(d)
 
 
 if __name__ == '__main__':

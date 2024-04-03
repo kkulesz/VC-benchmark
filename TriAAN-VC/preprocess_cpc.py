@@ -53,10 +53,10 @@ def main(cfg):
                                         
 
 if __name__ == '__main__':
-    english_data_cfgs_path = './config/EnglishData'
-    english_data_cfgs = os.listdir(english_data_cfgs_path)
-    preprocess_cfgs = list(filter(lambda f: 'base' in f, english_data_cfgs))
+    data_cfgs_path = './config/PolishData'
+    data_cfgs = os.listdir(data_cfgs_path)
+    preprocess_cfgs = list(filter(lambda f: 'base' in f, data_cfgs))
     for cfg_name in preprocess_cfgs:
         print(cfg_name)
-        cfg = Config(os.path.join(english_data_cfgs_path, cfg_name))
+        cfg = Config(os.path.join(data_cfgs_path, cfg_name))
         main(cfg)
