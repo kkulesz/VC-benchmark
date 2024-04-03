@@ -40,26 +40,28 @@ def filter_results_and_reformat_it(
     times_triann = df_triann['execution_time'].tolist()
 
     x_ticks = df_stargan['number_of_speakers'].tolist()
-    y_label = 'Training time'
 
     models_plot_properties = [
         ('StarGANv2-VC', 'red', times_stargan),
         ('TriANN-VC', 'blue', times_triann)
     ]
 
-    return plot_title, y_label, x_ticks, models_plot_properties
+    return plot_title, x_ticks, models_plot_properties
 
 
 def bar_plot_of_execution_time(
         plot_title: str,
         y_label: str,
+        x_label: str,
         x_ticks,
-        models_plot_properties
+        models_plot_properties,
+        plot_filename: str
 ):
     bar_width = 0.25
     fig = plt.subplots(figsize=(12, 8))
 
     plt.ylabel(y_label)
+    plt.xlabel(x_label)
     plt.title(plot_title)
     plt.xticks([r + (bar_width / 2) * (len(models_plot_properties) - 1) for r in range(len(x_ticks))], x_ticks)
     for idx, (label, color, values) in enumerate(models_plot_properties):
@@ -67,5 +69,6 @@ def bar_plot_of_execution_time(
         plt.bar(br, values, color=color, width=bar_width, edgecolor='grey', label=label)
     plt.legend()
     # plt.xticks(rotation=90, fontsize=10)
+    plt.savefig(plot_filename, dpi=1200)
 
     plt.show()
