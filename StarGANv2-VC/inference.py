@@ -220,7 +220,7 @@ def convert_whole_folder(
 
 def main():
     import inference_utils
-    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = inference_utils.get_english_data(10)
+    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = inference_utils.get_english_data(25)
 
     f0_model = load_f0_model(f0_model_path)
     stargan = load_stargan(stargan_path, cfg_path)

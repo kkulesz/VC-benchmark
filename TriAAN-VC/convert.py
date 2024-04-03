@@ -201,7 +201,7 @@ def convert_whole_folder(
 
 if __name__ == "__main__":
     import convert_utils
-    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = convert_utils.get_english_data(50)
+    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = convert_utils.get_english_data(25)
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
