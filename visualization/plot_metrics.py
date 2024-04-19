@@ -87,8 +87,8 @@ def filter_results_and_reformat_it_between_models(
 
     x_ticks = df_stargan['number_of_speakers'].tolist()
     models_plot_properties = [
-        ('StarGANv2-VC', 'red', metric_stargan),
-        ('TriANN-VC', 'blue', metric_triann)
+        ('StarGANv2-VC', 'deepskyblue', metric_stargan),
+        ('TriANN-VC', 'lightsalmon', metric_triann)
     ]
 
     return plot_title, x_ticks, models_plot_properties, y_limits
@@ -97,7 +97,8 @@ def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
         model: str,
         metric: str,
         df: pd.DataFrame,
-        plot_title: str
+        plot_title: str,
+        bar_labels
 ):
     df = df[df.model == model]
 
@@ -122,8 +123,8 @@ def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
 
     x_ticks = df_seen['number_of_speakers'].tolist()
     models_plot_properties = [
-        ('Seen', 'green', metric_seen),
-        ('Unseen', 'purple', metric_unseen)
+        (bar_labels[0], 'red', metric_seen),
+        (bar_labels[1], 'blue', metric_unseen)
     ]
 
     return plot_title, x_ticks, models_plot_properties, y_limits
@@ -142,7 +143,7 @@ def bar_plot_of_metric_over_number_of_speakers_for_each_model(
 
     plt.ylabel(y_label)
     plt.xlabel(x_label)
-    plt.title(plot_title)
+    # plt.title(plot_title)
     plt.xticks([r + (bar_width / 2) * (len(models_plot_properties) - 1) for r in range(len(x_ticks))], x_ticks)
     for idx, (label, color, values) in enumerate(models_plot_properties):
         br = [x + bar_width * idx for x in np.arange(len(values))]
@@ -151,6 +152,6 @@ def bar_plot_of_metric_over_number_of_speakers_for_each_model(
     plt.ylim(ymin=y_limits[0], ymax=y_limits[1])
     # plt.xticks(rotation=90, fontsize=10)
 
-    plt.savefig(plot_filename, dpi=1200)
+    plt.savefig(plot_filename, dpi=600)
 
     plt.show()

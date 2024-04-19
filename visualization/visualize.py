@@ -57,14 +57,16 @@ def plot_metrics_seen():
             title = f'Wynik {metric} modelu {map_model_to_title(model)} w zależności od obecności mówców testowych w zbiorze treningowym'
             y_label = metric
             x_label = 'Liczba mówców w zbiorze treningowym'
+            bar_labels = ['widziani', 'niewidziani']
         else:
             title = f'{metric} score of {map_model_to_title(model)} on seen vs unseen speakers over number of speakers in training dataset'
             y_label = metric
             x_label = 'Number of speakers in the training dataset'
+            bar_labels = ['seen', 'unseen']
 
         plot_title, x_ticks, models_plot_properties, bottom = \
             plot_metrics.filter_results_and_reformat_it_between_seen_and_unseen_speakers(model=model, metric=metric,
-                                                                                         df=df, plot_title=title)
+                                                                                         df=df, plot_title=title, bar_labels=bar_labels)
 
         plot_file_path = os.path.join(SAVE_DIRECTORY, f'{metric}_{model}_seen_vs_unseen.png')
 
@@ -121,13 +123,15 @@ def plot_MOSNet_score_seen():
             title = f'Wynik MOSnet modelu {map_model_to_title(model)} w zależności od obecności mówców testowych w zbiorze treningowym'
             y_label = 'Wynik MOSNet'
             x_label = 'Liczba mówców w zbiorze treningowym'
+            bar_labels = ['widziani', 'niewidziani']
         else:
             title = f'MOSNet score of {map_model_to_title(model)} on seen vs unseen speakers over number of speakers in training dataset'
             y_label = 'MOSNet score'
             x_label = 'Number of speakers in the training dataset'
+            bar_labels = ['seen', 'unseen']
 
         plot_title, x_ticks, models_plot_properties, bottom = \
-            plot_mosnet.filter_results_and_reformat_it_between_seen(model=model, df=df, plot_title=title)
+            plot_mosnet.filter_results_and_reformat_it_between_seen(model=model, df=df, plot_title=title, bar_labels=bar_labels)
         plot_file_path = os.path.join(SAVE_DIRECTORY, f'MOSNet_score_{model}_seen_vs_unseen.png')
 
         plot_mosnet.bar_plot_of_MOSNet_score_over_number_of_speakers(
@@ -142,6 +146,12 @@ def remove_mosnet_results(directory: str = '../../samples'):
 
 
 def main():
+    # stargan - deepskyblue
+    # triann - lightsalmon
+
+    # seen - palegreen
+    # unseen - papayawhip
+
     plot_metrics_models()
     plot_metrics_seen()
     plot_execution_time()

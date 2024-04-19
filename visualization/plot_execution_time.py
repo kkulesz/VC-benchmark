@@ -42,8 +42,8 @@ def filter_results_and_reformat_it(
     x_ticks = df_stargan['number_of_speakers'].tolist()
 
     models_plot_properties = [
-        ('StarGANv2-VC', 'red', times_stargan),
-        ('TriANN-VC', 'blue', times_triann)
+        ('StarGANv2-VC', 'deepskyblue', times_stargan),
+        ('TriANN-VC', 'lightsalmon', times_triann)
     ]
 
     return plot_title, x_ticks, models_plot_properties
@@ -69,6 +69,6 @@ def bar_plot_of_execution_time(
         plt.bar(br, values, color=color, width=bar_width, edgecolor='grey', label=label)
     plt.legend()
     # plt.xticks(rotation=90, fontsize=10)
-    plt.savefig(plot_filename, dpi=1200)
+    plt.savefig(plot_filename, dpi=600)
 
     plt.show()
