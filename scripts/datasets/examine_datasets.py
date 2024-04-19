@@ -6,8 +6,21 @@ import pandas as pd
 from itertools import groupby
 
 VCTK_PATH = "../../../Data-raw/VCTK\wav48_silence_trimmed"
+VCC18_PATH = "../../../Data/VCC18/vcc2018_training"
 # STARGAN_DEMO_DIR_PATH = "../../../Data/StarGANv2-VC"
 POLISH_DATA_DIR_PATH = "../../../Data-raw/pl-asr-bigos/data"
+
+
+def get_VCC18_data_speakers_dict():
+    dir_path = VCC18_PATH
+    speakers_dirs = [f for f in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, f))]
+    speaker_files_dict = {}
+    for speaker in speakers_dirs:
+        speaker_dir_full_path = os.path.join(dir_path, speaker)
+        speaker_wavs = [os.path.join(speaker_dir_full_path, f) for f in os.listdir(speaker_dir_full_path)]
+        print(speaker_wavs)
+        speaker_files_dict[speaker] = speaker_wavs
+    return speaker_files_dict, True
 
 
 def get_VCTK_data_speakers_dict():
@@ -150,7 +163,8 @@ def examine_dict(d, is_wave):
 
 
 def main():
-    speakers_dict, is_wave = get_VCTK_data_speakers_dict()
+    speakers_dict, is_wave = get_VCC18_data_speakers_dict()
+    # speakers_dict, is_wave = get_VCTK_data_speakers_dict()
     # speakers_dict, is_wave = get_polish_data_speakers_dict()
 
     examine_dict(speakers_dict, is_wave)
