@@ -67,9 +67,12 @@ def get_english_data(directory: str):
     return f'./config/EnglishData/base-EnglishData-{directory}.yaml', f'../../Models/EnglishData-{directory}/triann', directory != '2spks'
 
 
+def get_polish_data(directory: str):
+    return f'./config/PolishData/base-PolishData-{directory}.yaml', f'../../Models/PolishData-{directory}/triann', directory != '2spks'
+
 
 if __name__ == "__main__":
-    cfg, save_dir, should_eval = get_english_data('2spks')
+    cfg, save_dir, should_eval = get_polish_data('10spks')
 
     pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
 

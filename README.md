@@ -31,7 +31,7 @@ Given you are in project root
 >
 > cd StarGANv2-VC
 > 
-> nohup python3 -u train.py --config_path ./Configs/config.yml &
+> nohup python3 -u train.py --config_path ./Configs/PolishData/config-PolishData-25spks.yml &
 
 ### most important:
 - preprocessing
