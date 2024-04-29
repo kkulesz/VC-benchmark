@@ -114,18 +114,31 @@ def main(directory):
         outfile.write("\nAverage: {}\n".format(average))
 
 
-def inference_all_sub_dirs(root_directory):
+def inference_all_sub_dirs_for_english(root_directory):
     for root_dir, dirs, files in os.walk(root_directory):
         if 'VCC2SF1_in_voice_of_VCC2SM1' in dirs or 'VCC2TF2_in_voice_of_VCC2TM2' in dirs:
             main(os.path.join(root_dir))
 
 
-def inference_original_files():
+def inference_original_english_files():
     main('../../../Data/EnglishData/test-seen')
     main('../../../Data/EnglishData/test-unseen')
 
 
+def inference_all_sub_dirs_for_polish(root_directory):
+    for root_dir, dirs, files in os.walk(root_directory):
+        if 'fair-mls-20~1889_in_voice_of_fair-mls-20~8758' in dirs or 'clarin-pjatk-studio-15~~0007_in_voice_of_mozilla-common-voice-19~~0040' in dirs:
+            main(os.path.join(root_dir))
+
+
+def inference_original_polish_files():
+    main('../../../Data/PolishData/test-seen')
+    main('../../../Data/PolishData/test-unseen')
+
+
 if __name__ == '__main__':
     # main(directory)
-    # inference_all_sub_dirs('../../../samples')
-    inference_original_files()
+    # inference_all_sub_dirs_for_english('../../../samples')
+    # inference_original_english_files()
+    # inference_original_polish_files()
+    inference_all_sub_dirs_for_polish('../../../samples')
