@@ -10,6 +10,7 @@ import torchaudio
 import librosa
 import time
 import pathlib
+from itertools import cycle
 
 from Utils.ASR.models import ASRCNN
 from Utils.JDC.model import JDCNet
@@ -45,23 +46,27 @@ def __build_model(model_params):
 def __compute_style(starganv2, speaker_dicts):
     reference_embeddings = {}
     for speaker_id, (target_rec_path, speaker_idx, converted_rec_path) in speaker_dicts.items():
-        if speaker_idx is None:
-            print("unseen")
-            speaker_idx = random.randint(0, len(speaker_dicts))
-            label = torch.LongTensor([speaker_idx]).to(device)
-            latent_dim = starganv2.mapping_network.shared[0].in_features
-            ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
-        else:
-            print("seen")
-            wave, sr = librosa.load(target_rec_path, sr=24000)
-            audio, index = librosa.effects.trim(wave, top_db=30)
-            if sr != 24000:
-                wave = librosa.resample(wave, sr, 24000)
-            mel_tensor = __preprocess(wave).to(device)
+        try:
+            if speaker_idx is None:
+                print("unseen")
+                speaker_idx = random.randint(0, len(speaker_dicts))
+                label = torch.LongTensor([speaker_idx]).to(device)
+                latent_dim = starganv2.mapping_network.shared[0].in_features
+                ref = starganv2.mapping_network(torch.randn(1, latent_dim).to(device), label)
+            else:
+                print("seen")
+                wave, sr = librosa.load(target_rec_path, sr=24000)
+                audio, index = librosa.effects.trim(wave, top_db=30)
+                if sr != 24000:
+                    wave = librosa.resample(wave, sr, 24000)
+                mel_tensor = __preprocess(wave).to(device)
 
-            with torch.no_grad():
-                label = torch.LongTensor([speaker_idx])
-                ref = starganv2.style_encoder(mel_tensor.unsqueeze(1), label)
+                with torch.no_grad():
+                    label = torch.LongTensor([speaker_idx])
+                    ref = starganv2.style_encoder(mel_tensor.unsqueeze(1), label)
+        except:
+            print("Excpetion")
+            continue
         reference_embeddings[speaker_id] = (ref, label, converted_rec_path)
 
     return reference_embeddings
@@ -187,7 +192,8 @@ def convert_whole_folder(
     seen_dir: str,
     unseen_dir: str,
     where_to_save_samples: str,
-    speaker_label_mapping
+    speaker_label_mapping,
+    is_english
 ):
     pathlib.Path(where_to_save_samples).mkdir(parents=True, exist_ok=True)
 
@@ -199,11 +205,23 @@ def convert_whole_folder(
         spk2_recs = sorted(os.listdir(os.path.join(directory, seen_spks[1])))
         spk2_recs = list(map(lambda f: os.path.join(directory, seen_spks[1], f), spk2_recs))
 
-        seen_recs = list(zip(spk1_recs, spk2_recs))
-        for r1, r2 in seen_recs:
-            assert os.path.basename(r1) == os.path.basename(r2)
-        seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
-
+        if is_english:
+            seen_recs = list(zip(spk1_recs, spk2_recs))
+            for r1, r2 in seen_recs:
+                assert os.path.basename(r1) == os.path.basename(r2)
+            seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+        else:
+            if len(spk1_recs) > len(spk2_recs):
+                spk2_recs = cycle(spk2_recs)
+                spk2_recs = [next(spk2_recs) for i in range(len(spk1_recs))]
+            else:
+                spk1_recs = cycle(spk1_recs)
+                spk1_recs = [next(cycle(spk1_recs)) for i in range(len(spk2_recs))]
+            seen_recs = list(zip(spk1_recs, spk2_recs))
+            seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+        # for f in seen_spks + seen_recs_reversed:
+        #     print(f)
+        # exit()
         return seen_recs + seen_recs_reversed
 
     total_seen_recs = get_rec_pairs_between_two_speakers_in_single_dir(seen_dir)
@@ -220,7 +238,8 @@ def convert_whole_folder(
 
 def main():
     import inference_utils
-    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping = inference_utils.get_english_data(25)
+    # cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping, is_english = inference_utils.get_english_data(25)
+    cfg_path, stargan_path, f0_model_path, vocoder_path, seen_dir, unseen_dir, where_to_save_samples, speaker_label_mapping, is_english = inference_utils.get_polish_data(25)
 
     f0_model = load_f0_model(f0_model_path)
     stargan = load_stargan(stargan_path, cfg_path)
@@ -229,7 +248,8 @@ def main():
     convert_whole_folder(
         f0_model=f0_model, stargan=stargan, vocoder=vocoder,
         seen_dir=seen_dir, unseen_dir=unseen_dir, where_to_save_samples=where_to_save_samples,
-        speaker_label_mapping=speaker_label_mapping
+        speaker_label_mapping=speaker_label_mapping,
+        is_english=is_english
     )
 
 
