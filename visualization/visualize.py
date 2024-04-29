@@ -101,10 +101,25 @@ def plot_MOSNet_score_models():
             title = f'Wynik modelu MOSNet obliczony na wypowiedziach mówców {"obecnych" if seen else "nieobecnych"} w zbiorze treningowym'
             y_label = 'Wynik MOSNet'
             x_label = 'Liczba mówców w zbiorze treningowym'
+            ground_truth_seen_label = 'pliki oryginalne'
+            ground_truth_unseen_label = 'pliki oryginalnie'
         else:
             title = f'MOSNet score on {"seen" if seen else "unseen"} speakers\' utterances over number of speakers in training dataset'
             y_label = 'MOSNet score'
             x_label = 'Number of speakers in the training dataset'
+            ground_truth_seen_label = 'original files'
+            ground_truth_unseen_label = 'original files'
+
+        if seen:
+            with open(os.path.join('../../Data/EnglishData/test-seen', 'MOSnet_result_raw.txt')) as f:
+                mosnet_seen_score = float(re.search(r'\d+.\d+', re.search(r'Average: \d+.\d+', f.read()).group()).group())
+                ground_truth_seen = (mosnet_seen_score, ground_truth_seen_label)
+                ground_truth_unseen = None
+        else:
+            with open(os.path.join('../../Data/EnglishData/test-unseen', 'MOSnet_result_raw.txt')) as f:
+                mosnet_unseen_score = float(re.search(r'\d+.\d+', re.search(r'Average: \d+.\d+', f.read()).group()).group())
+                ground_truth_seen = None
+                ground_truth_unseen = (mosnet_unseen_score, ground_truth_unseen_label)
 
         plot_title, x_ticks, models_plot_properties, bottom = \
             plot_mosnet.filter_results_and_reformat_it_between_models(seen=seen, df=df, plot_title=title)
@@ -112,7 +127,8 @@ def plot_MOSNet_score_models():
         plot_file_path = os.path.join(SAVE_DIRECTORY, f'MOSNet_score_{"seen" if seen else "unseen"}_between_models.png')
 
         plot_mosnet.bar_plot_of_MOSNet_score_over_number_of_speakers(
-            plot_title, y_label, x_label, x_ticks, models_plot_properties, bottom, plot_file_path)
+            plot_title, y_label, x_label, x_ticks, models_plot_properties, bottom, plot_file_path,
+            ground_truth_seen=ground_truth_seen, ground_truth_unseen=ground_truth_unseen)
 
 
 def plot_MOSNet_score_seen():
@@ -124,18 +140,31 @@ def plot_MOSNet_score_seen():
             y_label = 'Wynik MOSNet'
             x_label = 'Liczba mówców w zbiorze treningowym'
             bar_labels = ['widziani', 'niewidziani']
+            ground_truth_seen_label = 'widziani - pliki oryginalne'
+            ground_truth_unseen_label = 'niewidziani - pliki oryginalnie'
         else:
             title = f'MOSNet score of {map_model_to_title(model)} on seen vs unseen speakers over number of speakers in training dataset'
             y_label = 'MOSNet score'
             x_label = 'Number of speakers in the training dataset'
             bar_labels = ['seen', 'unseen']
+            ground_truth_seen_label = 'seen - original files'
+            ground_truth_unseen_label = 'unseen - original files'
+
+
+        with open(os.path.join('../../Data/EnglishData/test-seen', 'MOSnet_result_raw.txt')) as f:
+            mosnet_seen_score = float(re.search(r'\d+.\d+', re.search(r'Average: \d+.\d+', f.read()).group()).group())
+            ground_truth_seen = (mosnet_seen_score, ground_truth_seen_label)
+        with open(os.path.join('../../Data/EnglishData/test-unseen', 'MOSnet_result_raw.txt')) as f:
+            mosnet_unseen_score = float(re.search(r'\d+.\d+', re.search(r'Average: \d+.\d+', f.read()).group()).group())
+            ground_truth_unseen = (mosnet_unseen_score, ground_truth_unseen_label)
 
         plot_title, x_ticks, models_plot_properties, bottom = \
             plot_mosnet.filter_results_and_reformat_it_between_seen(model=model, df=df, plot_title=title, bar_labels=bar_labels)
         plot_file_path = os.path.join(SAVE_DIRECTORY, f'MOSNet_score_{model}_seen_vs_unseen.png')
 
         plot_mosnet.bar_plot_of_MOSNet_score_over_number_of_speakers(
-            plot_title, y_label, x_label, x_ticks, models_plot_properties, bottom, plot_file_path)
+            plot_title, y_label, x_label, x_ticks, models_plot_properties, bottom, plot_file_path,
+            ground_truth_seen=ground_truth_seen, ground_truth_unseen=ground_truth_unseen)
 
 
 def remove_mosnet_results(directory: str = '../../samples'):
@@ -152,9 +181,9 @@ def main():
     # seen - palegreen
     # unseen - papayawhip
 
-    plot_metrics_models()
-    plot_metrics_seen()
-    plot_execution_time()
+    # plot_metrics_models()
+    # plot_metrics_seen()
+    # plot_execution_time()
     plot_MOSNet_score_models()
     plot_MOSNet_score_seen()
 

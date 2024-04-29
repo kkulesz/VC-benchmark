@@ -120,6 +120,12 @@ def inference_all_sub_dirs(root_directory):
             main(os.path.join(root_dir))
 
 
+def inference_original_files():
+    main('../../../Data/EnglishData/test-seen')
+    main('../../../Data/EnglishData/test-unseen')
+
+
 if __name__ == '__main__':
     # main(directory)
-    inference_all_sub_dirs('../../../samples')
+    # inference_all_sub_dirs('../../../samples')
+    inference_original_files()

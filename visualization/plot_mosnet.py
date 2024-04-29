@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+Y_LIMITS = (2.8, 4.85)
+
 
 def read_results(root_directory: str):
     results = []
@@ -46,14 +48,13 @@ def filter_results_and_reformat_it_between_models(
     metric_stargan = df_stargan['mosnet_score'].tolist()
     metric_triann = df_triann['mosnet_score'].tolist()
 
-    y_limits = (2.5, 4.6)
     x_ticks = df_stargan['number_of_speakers'].tolist()
     models_plot_properties = [
         ('StarGANv2-VC', 'deepskyblue', metric_stargan),
         ('TriANN-VC', 'lightsalmon', metric_triann)
     ]
 
-    return plot_title, x_ticks, models_plot_properties, y_limits
+    return plot_title, x_ticks, models_plot_properties, Y_LIMITS
 
 
 def filter_results_and_reformat_it_between_seen(
@@ -73,14 +74,13 @@ def filter_results_and_reformat_it_between_seen(
     metric_seen = df_seen['mosnet_score'].tolist()
     metric_unseen = df_unseen['mosnet_score'].tolist()
 
-    y_limits = (2.5, 4.6)
     x_ticks = df_seen['number_of_speakers'].tolist()
     models_plot_properties = [
         (bar_labels[0], 'red', metric_seen),
         (bar_labels[1], 'blue', metric_unseen)
     ]
 
-    return plot_title, x_ticks, models_plot_properties, y_limits
+    return plot_title, x_ticks, models_plot_properties, Y_LIMITS
 
 
 def bar_plot_of_MOSNet_score_over_number_of_speakers(
@@ -90,7 +90,9 @@ def bar_plot_of_MOSNet_score_over_number_of_speakers(
         x_ticks,
         models_plot_properties,
         y_limits,
-        plot_filename: str
+        plot_filename: str,
+        ground_truth_seen=None,
+        ground_truth_unseen=None
 ):
     bar_width = 0.25
     fig = plt.subplots(figsize=(12, 8))
@@ -98,11 +100,16 @@ def bar_plot_of_MOSNet_score_over_number_of_speakers(
     plt.ylabel(y_label)
     plt.xlabel(x_label)
     # plt.title(plot_title)
+    if ground_truth_seen:
+        plt.axhline(y=ground_truth_seen[0], color='r', linestyle=':', label=ground_truth_seen[1])
+    if ground_truth_unseen:
+        plt.axhline(y=ground_truth_unseen[0], color='b', linestyle=':', label=ground_truth_unseen[1])
+
     plt.xticks([r + (bar_width / 2) * (len(models_plot_properties) - 1) for r in range(len(x_ticks))], x_ticks)
     for idx, (label, color, values) in enumerate(models_plot_properties):
         br = [x + bar_width * idx for x in np.arange(len(values))]
         plt.bar(br, values, color=color, width=bar_width, edgecolor='grey', label=label)
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.ylim(ymin=y_limits[0], ymax=y_limits[1])
     # plt.xticks(rotation=90, fontsize=10)
 
