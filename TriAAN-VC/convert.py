@@ -20,6 +20,7 @@ import kaldiio
 import librosa
 import resampy
 import pyworld as pw
+from itertools import cycle
 
 from src.train import *
 from src.dataset import *
@@ -162,7 +163,8 @@ def convert_whole_folder(
         stats_path: str,
         seen_dir: str,
         unseen_dir: str,
-        where_to_save_samples: str
+        where_to_save_samples: str,
+        is_english
 ):
     pathlib.Path(where_to_save_samples).mkdir(parents=True, exist_ok=True)
     def get_rec_pairs_between_two_speakers_in_single_dir(directory: str):
@@ -173,10 +175,20 @@ def convert_whole_folder(
         spk2_recs = sorted(os.listdir(os.path.join(directory, seen_spks[1])))
         spk2_recs = list(map(lambda f: os.path.join(directory, seen_spks[1], f), spk2_recs))
 
-        seen_recs = list(zip(spk1_recs, spk2_recs))
-        for r1, r2 in seen_recs:
-            assert os.path.basename(r1) == os.path.basename(r2)
-        seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+        if is_english:
+            seen_recs = list(zip(spk1_recs, spk2_recs))
+            for r1, r2 in seen_recs:
+                assert os.path.basename(r1) == os.path.basename(r2)
+            seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
+        else:
+            if len(spk1_recs) > len(spk2_recs):
+                spk2_recs = cycle(spk2_recs)
+                spk2_recs = [next(spk2_recs) for i in range(len(spk1_recs))]
+            else:
+                spk1_recs = cycle(spk1_recs)
+                spk1_recs = [next(cycle(spk1_recs)) for i in range(len(spk2_recs))]
+            seen_recs = list(zip(spk1_recs, spk2_recs))
+            seen_recs_reversed = list(zip(spk2_recs, spk1_recs))
 
         return seen_recs + seen_recs_reversed
 
@@ -201,7 +213,8 @@ def convert_whole_folder(
 
 if __name__ == "__main__":
     import convert_utils
-    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples = convert_utils.get_english_data(25)
+    # cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_english_data(25)
+    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_polish_data(25)
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
@@ -223,4 +236,6 @@ if __name__ == "__main__":
         stats_path=mel_stats_path,
         seen_dir=seen_dir,
         unseen_dir=unseen_dir,
-        where_to_save_samples=where_to_save_samples)
+        where_to_save_samples=where_to_save_samples,
+        is_english=is_english
+    )
