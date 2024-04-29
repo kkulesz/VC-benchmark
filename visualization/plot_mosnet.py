@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-Y_LIMITS = (2.8, 4.85)
+Y_LIMITS = (2.5, 4.85)
 
 
 def read_results(root_directory: str):
@@ -18,6 +18,14 @@ def read_results(root_directory: str):
                 model = 'triann'
             else:
                 raise 'No model in path!'
+
+            if 'EnglishData' in root_dir:
+                lang = 'english'
+            elif 'PolishData' in root_dir:
+                lang = 'polish'
+            else:
+                raise 'No language in path!'
+
             number_of_speakers = int(re.search(r'\d+', re.search(r'\d+spks', root_dir).group()).group())
             seen = 'unseen' not in root_dir
             directory = os.path.basename(root_dir)
@@ -25,18 +33,20 @@ def read_results(root_directory: str):
                 mosnet_score = float(re.search(r'\d+.\d+', re.search(r'Average: \d+.\d+', f.read()).group()).group())
 
             results.append(
-                (model, number_of_speakers, seen, directory, mosnet_score)
+                (lang, model, number_of_speakers, seen, directory, mosnet_score)
             )
     df = pd.DataFrame(results,
-                      columns=['model', 'number_of_speakers', 'seen', 'directory', 'mosnet_score'])
+                      columns=['language', 'model', 'number_of_speakers', 'seen', 'directory', 'mosnet_score'])
     return df
 
 
 def filter_results_and_reformat_it_between_models(
+        language: str,
         seen: bool,
         df: pd.DataFrame,
         plot_title: str
 ):
+    df = df[df.language == language]
     df = df[df.seen == seen]
 
     df_stargan = df[df.model == 'stargan']
@@ -58,11 +68,13 @@ def filter_results_and_reformat_it_between_models(
 
 
 def filter_results_and_reformat_it_between_seen(
+        language: str,
         model: str,
         df: pd.DataFrame,
         plot_title: str,
         bar_labels
 ):
+    df = df[df.language == language]
     df = df[df.model == model]
 
     df_seen = df[df.seen == True]
