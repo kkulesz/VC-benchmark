@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-Y_LIMITS = (2.5, 4.85)
+Y_LIMITS = (0, 5)
 
 
 def read_results(root_directory: str):
