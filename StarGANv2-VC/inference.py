@@ -255,25 +255,28 @@ def main():
 
 def measure_inference_time():
     import time
+    from time import sleep
     start = time.time()
+    for i in range(100):
+        print(i)
+        cfg_path = '../../Models/EnglishData-50spks/stargan/config-EnglishData-50spks.yml'
+        model_path = '../../Models/EnglishData-50spks/stargan/final.pth'
+        f0_model_path = 'Utils/JDC/bst.t7'
+        vocoder_path = 'Vocoder/checkpoint-400000steps.pkl'
 
-    cfg_path = '../../Models/EnglishData-50spks/stargan/config-EnglishData-50spks.yml'
-    model_path = '../../Models/EnglishData-50spks/stargan/final.pth'
-    f0_model_path = 'Utils/JDC/bst.t7'
-    vocoder_path = 'Vocoder/checkpoint-400000steps.pkl'
+        f0_model = load_f0_model(f0_model_path)
+        stargan = load_stargan(model_path, cfg_path)
+        vocoder = load_vocoder(vocoder_path)
 
-    f0_model = load_f0_model(f0_model_path)
-    stargan = load_stargan(model_path, cfg_path)
-    vocoder = load_vocoder(vocoder_path)
+        src = '../../inference_test/src.wav'
+        trg = '../../inference_test/trg.wav'
+        save_dir = '../../inference_test'
 
-    src = '../../inference_test/src.wav'
-    trg = '../../inference_test/trg.wav'
-    save_dir = '../../inference_test'
+        mapping = {}
 
-    mapping = {}
-
-    convert(f0_model, stargan, vocoder, src, [trg], save_dir, mapping, generate_debug_recs=False)
-
+        convert(f0_model, stargan, vocoder, src, [trg], save_dir, mapping, generate_debug_recs=False)
+        print('sleeping')
+        sleep(100)
     print(f"Inference time = {time.time() - start}")
 
 if __name__ == '__main__':
