@@ -1,5 +1,5 @@
-data_path:     ../../Data/DemoData-TRIANN-TRAIN
-wav_path:      ../../Data/DemoData-2-splitted/TRAIN
+data_path:     ../../Data/EnglishData/50spks/triann
+wav_path:      ../../Data/EnglishData/50spks/raw
 converted_path: 
 vocoder_path:    ./vocoder
 cpc_path:        ./cpc
@@ -32,12 +32,12 @@ model:
       num_layer:     6
 
 train:
-  epoch:        500
-  batch_size:   48 # maximum for titan
+  epoch:        200
+  batch_size:   8
   lr:           1e-4
   loss:         l1
-  eval_every:   50
-  save_epoch:   50
+  eval_every:   100
+  save_epoch:   100
   siam:         true
   cpc:          true
 

@@ -71,8 +71,12 @@ def get_polish_data(directory: str):
     return f'./config/PolishData/base-PolishData-{directory}.yaml', f'../../Models/PolishData-{directory}/triann', directory != '2spks'
 
 
+def get_test_data():
+    return './config/base-batch-size=8.yaml', '../../Models/batch_size=8/triann', True
+
+
 if __name__ == "__main__":
-    cfg, save_dir, should_eval = get_polish_data('10spks')
+    cfg, save_dir, should_eval = get_test_data()
 
     pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
 

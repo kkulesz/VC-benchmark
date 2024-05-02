@@ -211,10 +211,19 @@ def convert_whole_folder(
     rename_converted_files(where_to_save_samples)
 
 
-if __name__ == "__main__":
-    import convert_utils
-    # cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_english_data(25)
-    cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_polish_data(25)
+def measure_inference_time():
+    import time
+    start = time.time()
+
+    cfg = f'../../Models/EnglishData-50spks/triann/base-EnglishData-50spks.yaml'
+    random_mel_stats = '../../Models/EnglishData-50spks/triann/mel_stats.npy'
+    model = '../../Models/EnglishData-50spks/triann/model-last.pth'
+    src = '../../inference_test/src.wav'
+    trg = '../../inference_test/trg.wav'
+    cnv = '../../inference_test/cnv.wav'
+    target = (trg, cnv)
+    save_dir = '../../inference_test'
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
     parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
@@ -222,20 +231,45 @@ if __name__ == "__main__":
     # parser.add_argument('--src_name', type=str, nargs='+', default=['src.flac'], help='Sample source name')
     # parser.add_argument('--trg_name', type=str, nargs='+', default=['trg.flac'], help='Sample target name')
 
-    parser.add_argument('--checkpoint', type=str, default=where_to_save_samples, help='Results load path')
+    parser.add_argument('--checkpoint', type=str, default=save_dir, help='Results load path')
     parser.add_argument('--model_name', type=str, default=model, help='Best model name')
     parser.add_argument('--seed', type=int, default=1234, help='Seed')
-    
+
     args = parser.parse_args()
     cfg  = Config(args.config)
     cfg  = set_experiment(args, cfg)
-    # print(cfg)
+    main(cfg=cfg, mel_stats_path=random_mel_stats, source=src, targets=[target], save_dir=save_dir, generate_debug_recs=False)
+    os.rename('../../inference_test/cnv.wav_cnv_gen.wav', '../../inference_test/cnv-triann.wav')
+    print(f"Inference time = {time.time() - start}")
 
-    convert_whole_folder(
-        cfg=cfg,
-        stats_path=mel_stats_path,
-        seen_dir=seen_dir,
-        unseen_dir=unseen_dir,
-        where_to_save_samples=where_to_save_samples,
-        is_english=is_english
-    )
+
+if __name__ == "__main__":
+    # import convert_utils
+    # # cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_english_data(25)
+    # cfg, model, mel_stats_path, seen_dir, unseen_dir, where_to_save_samples, is_english = convert_utils.get_polish_data(25)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--config', type=str, default=cfg, help='config yaml file')
+    # parser.add_argument('--device', type=str, default='cuda:0', help='Cuda device')
+    # # parser.add_argument('--sample_path', type=str, default='./samples', help='Sample path')
+    # # parser.add_argument('--src_name', type=str, nargs='+', default=['src.flac'], help='Sample source name')
+    # # parser.add_argument('--trg_name', type=str, nargs='+', default=['trg.flac'], help='Sample target name')
+    #
+    # parser.add_argument('--checkpoint', type=str, default=where_to_save_samples, help='Results load path')
+    # parser.add_argument('--model_name', type=str, default=model, help='Best model name')
+    # parser.add_argument('--seed', type=int, default=1234, help='Seed')
+    #
+    # args = parser.parse_args()
+    # cfg  = Config(args.config)
+    # cfg  = set_experiment(args, cfg)
+    # # print(cfg)
+    #
+    # convert_whole_folder(
+    #     cfg=cfg,
+    #     stats_path=mel_stats_path,
+    #     seen_dir=seen_dir,
+    #     unseen_dir=unseen_dir,
+    #     where_to_save_samples=where_to_save_samples,
+    #     is_english=is_english
+    # )
+
+    measure_inference_time()
