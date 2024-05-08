@@ -3,6 +3,8 @@
 Models used:
 - StarGANv2-VC - https://github.com/yl4579/StarGANv2-VC / https://arxiv.org/abs/2107.10394
   - works!!!
+- FreeVC - https://github.com/OlaWod/FreeVC / https://arxiv.org/abs/2210.15418
+  - todo: train and inference with model trained by me
 - TriAAN-VC - https://github.com/winddori2002/TriAAN-VC / https://arxiv.org/abs/2303.09057
   - works!!!
 - DYGAN - https://github.com/MingjieChen/DYGANVC / https://arxiv.org/abs/2203.17172
