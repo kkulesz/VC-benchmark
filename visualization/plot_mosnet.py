@@ -109,8 +109,8 @@ def bar_plot_of_MOSNet_score_over_number_of_speakers(
     bar_width = 0.25
     fig = plt.subplots(figsize=(12, 8))
 
-    plt.ylabel(y_label)
-    plt.xlabel(x_label)
+    plt.ylabel(y_label, fontsize=21)
+    plt.xlabel(x_label, fontsize=21)
     # plt.title(plot_title)
     if ground_truth_seen:
         plt.axhline(y=ground_truth_seen[0], color='r', linestyle=':', label=ground_truth_seen[1])
@@ -125,6 +125,6 @@ def bar_plot_of_MOSNet_score_over_number_of_speakers(
     plt.ylim(ymin=y_limits[0], ymax=y_limits[1])
     # plt.xticks(rotation=90, fontsize=10)
 
-    plt.savefig(plot_filename, dpi=600)
+    plt.savefig(plot_filename, dpi=600, bbox_inches='tight')
 
     plt.show()

@@ -18,7 +18,7 @@ POLISH_LANG = 'polish'
 
 SAVE_DIRECTORY = '../../Plots'
 GENERATE_POLISH_LABELS = True
-GENERATE_POLISH = False
+GENERATE_POLISH = True
 
 
 def map_model_to_title(model: str):

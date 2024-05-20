@@ -7,6 +7,7 @@ import pandas as pd
 import itertools
 import statistics
 
+
 def read_results(root_directory: str):
     def merge_male_and_female_results(dataframe: pd.DataFrame):
         models = dataframe['model'].unique()
@@ -18,7 +19,7 @@ def read_results(root_directory: str):
                 (dataframe['model'] == m) &
                 (dataframe['number_of_speakers'] == spks) &
                 (dataframe['seen'] == s)
-            ]
+                ]
 
             assert len(filtered) == 2
             mcd = statistics.mean(filtered['MCD'])
@@ -93,6 +94,7 @@ def filter_results_and_reformat_it_between_models(
 
     return plot_title, x_ticks, models_plot_properties, y_limits
 
+
 def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
         model: str,
         metric: str,
@@ -120,7 +122,6 @@ def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
     else:
         y_limits = (0.8 * min_value, 1.05 * max_value)
 
-
     x_ticks = df_seen['number_of_speakers'].tolist()
     models_plot_properties = [
         (bar_labels[0], 'red', metric_seen),
@@ -128,6 +129,7 @@ def filter_results_and_reformat_it_between_seen_and_unseen_speakers(
     ]
 
     return plot_title, x_ticks, models_plot_properties, y_limits
+
 
 def bar_plot_of_metric_over_number_of_speakers_for_each_model(
         plot_title: str,
@@ -141,8 +143,8 @@ def bar_plot_of_metric_over_number_of_speakers_for_each_model(
     bar_width = 0.25
     fig = plt.subplots(figsize=(12, 8))
 
-    plt.ylabel(y_label)
-    plt.xlabel(x_label)
+    plt.ylabel(y_label, fontsize=21)
+    plt.xlabel(x_label, fontsize=21)
     # plt.title(plot_title)
     plt.xticks([r + (bar_width / 2) * (len(models_plot_properties) - 1) for r in range(len(x_ticks))], x_ticks)
     for idx, (label, color, values) in enumerate(models_plot_properties):
@@ -152,6 +154,6 @@ def bar_plot_of_metric_over_number_of_speakers_for_each_model(
     plt.ylim(ymin=y_limits[0], ymax=y_limits[1])
     # plt.xticks(rotation=90, fontsize=10)
 
-    plt.savefig(plot_filename, dpi=600)
+    plt.savefig(plot_filename, dpi=600, bbox_inches='tight')
 
     plt.show()
