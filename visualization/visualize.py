@@ -17,6 +17,7 @@ ENGLISH_LANG = 'english'
 POLISH_LANG = 'polish'
 
 SAVE_DIRECTORY = '../../Plots'
+RESULTS_DIR = '../../samples'
 GENERATE_POLISH_LABELS = True
 GENERATE_POLISH = True
 
@@ -32,7 +33,7 @@ def map_model_to_title(model: str):
 
 def plot_metrics_models():
     import plot_metrics
-    df = plot_metrics.read_results('../../samples')
+    df = plot_metrics.read_results(RESULTS_DIR)
     for metric, seen in itertools.product([MCD, SNR], [True, False]):
         if GENERATE_POLISH_LABELS:
             title = f'Wynik {metric} obliczony na wypowiedziach mówców {"obecnych" if seen else "nieobecnych"} w zbiorze treningowym'
@@ -55,7 +56,7 @@ def plot_metrics_models():
 
 def plot_metrics_seen():
     import plot_metrics
-    df = plot_metrics.read_results('../../samples')
+    df = plot_metrics.read_results(RESULTS_DIR)
     for metric, model in itertools.product([MCD, SNR], [STARGAN, TRIANN]):
         if GENERATE_POLISH_LABELS:
             title = f'Wynik {metric} modelu {map_model_to_title(model)} w zależności od obecności mówców testowych w zbiorze treningowym'
@@ -99,7 +100,7 @@ def plot_execution_time():
 
 def plot_MOSNet_score_models(language: str):
     import plot_mosnet
-    df = plot_mosnet.read_results('../../samples')
+    df = plot_mosnet.read_results(RESULTS_DIR)
     for seen in [True, False]:
         if GENERATE_POLISH_LABELS:
             title = f'Wynik modelu MOSNet obliczony na wypowiedziach mówców {"obecnych" if seen else "nieobecnych"} w zbiorze treningowym'
@@ -138,7 +139,7 @@ def plot_MOSNet_score_models(language: str):
 
 def plot_MOSNet_score_seen(language: str):
     import plot_mosnet
-    df = plot_mosnet.read_results('../../samples')
+    df = plot_mosnet.read_results(RESULTS_DIR)
     for model in [STARGAN, TRIANN]:
         if GENERATE_POLISH_LABELS:
             title = f'Wynik MOSnet modelu {map_model_to_title(model)} w zależności od obecności mówców testowych w zbiorze treningowym'
@@ -174,7 +175,7 @@ def plot_MOSNet_score_seen(language: str):
             ground_truth_seen=ground_truth_seen, ground_truth_unseen=ground_truth_unseen)
 
 
-def remove_mosnet_results(directory: str = '../../samples'):
+def remove_mosnet_results(directory: str = RESULTS_DIR):
     files_pattern = os.path.join(directory, '*/*/*/*/MOSnet_result_raw.txt')
     files_to_remove = glob.glob(files_pattern)
     for f in files_to_remove:
